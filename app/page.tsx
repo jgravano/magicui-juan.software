@@ -155,25 +155,25 @@ export default function Home() {
               <div className="group">
                 <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">ARTE DIGITAL</h3>
                 <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Explorando nuevas formas de expresión a través de código y datos.
+                  Me gusta transformar datos en experiencias visuales únicas. Estoy explorando el arte generativo y sus infinitas posibilidades creativas.
                 </p>
               </div>
               <div className="group">
                 <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">GASTRONOMÍA</h3>
                 <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Estudiante de gastronomía, apasionado por el café de especialidad y la pizza napolitana.
+                  Disfruto experimentar en la cocina, desde el café de especialidad hasta la creación de pizzas napolitanas perfectas en casa.
                 </p>
               </div>
               <div className="group">
-                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">ARTE & DISEÑO</h3>
+                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">CONEXIÓN CON EL MAR</h3>
                 <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Fascinado por el diseño gráfico, la tipografía y el arte contemporáneo.
+                  El mar es una fuente constante de inspiración para mí. Me atraen su inmensidad, su calma y su capacidad de renovar la mente. Siempre busco formas de integrar su esencia en mi vida y proyectos creativos.
                 </p>
               </div>
               <div className="group">
                 <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">BIENESTAR</h3>
                 <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Explorando la intersección entre tecnología y hábitos saludables.
+                  Estoy aprendiendo a equilibrar hábitos, productividad y calidad de vida a través de la nutrición, el ejercicio y la autoconciencia.
                 </p>
               </div>
             </div>
@@ -214,7 +214,7 @@ export default function Home() {
 
       <footer className="py-6 sm:py-8 bg-black text-center text-zinc-600 text-base sm:text-lg font-mono border-t border-zinc-900">
         <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto">
-          © {new Date().getFullYear()} juan.software — Crafted with purpose
+          © {new Date().getFullYear()} | made with ❤️ by juan.software
         </div>
       </footer>
     </div>
