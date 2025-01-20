@@ -18,6 +18,14 @@ const geistMono = localFont({
 export const metadata: Metadata = {
   title: "Juan Gravano — QA Engineer & Creative Technologist",
   description: "Explorando la intersección entre tecnología y creatividad. QA Engineer y Creative Technologist basado en Buenos Aires, especializado en automatización y proyectos creativos.",
+  icons: {
+    icon: [
+      {
+        url: '/favicon.svg',
+        type: 'image/svg+xml',
+      }
+    ],
+  },
   keywords: [
     "Juan Gravano",
     "QA Engineer",
