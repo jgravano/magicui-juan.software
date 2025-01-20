@@ -1,1 +1,0 @@
-self.__NEXT_FONT_MANIFEST="{\"pages\":{},\"app\":{\"/Users/juancho/Desktop/projects/magicui-juan.software/app/layout\":[\"static/media/0acf7bf726cd1ef0-s.p.woff2\",\"static/media/463dafcda517f24f-s.p.woff\"]},\"appUsingSizeAdjust\":true,\"pagesUsingSizeAdjust\":false}"

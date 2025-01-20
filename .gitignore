@@ -10,6 +10,10 @@
 # next.js
 /.next/
 /out/
+.next/**/*
+**/*.pack
+**/*.pack.gz
+**/*.pack.gz.old
 
 # production
 /build
@@ -48,3 +52,8 @@ next-env.d.ts
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Cache files
+.cache/
+**/*.cache
+**/*.log
