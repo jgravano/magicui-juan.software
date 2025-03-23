@@ -1,222 +1,252 @@
-import Image from "next/image";
-import { SmoothScroll } from "@/components/smooth-scroll";
+'use client';
+
+import SpaceBackground from '@/components/space-background';
+import { UniverseSection } from '@/components/universe-map';
+import { AnimatePresence, motion, useScroll, useTransform } from 'framer-motion';
+import { useEffect, useRef, useState } from 'react';
+
+// Importamos componentes específicos para cada sección
+import ContactoContent from '@/components/sections/contacto';
+import ExperienciaContent from '@/components/sections/experiencia';
+import ProyectosContent from '@/components/sections/proyectos';
+import SobreMiContent from '@/components/sections/sobre-mi';
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeSection, setActiveSection] = useState<UniverseSection | null>(null);
+  const [scrollProgress, setScrollProgress] = useState(0);
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end end"]
+  });
+
+  // Simulamos una carga inicial (como si fuera un "despegue")
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsLoading(false);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Efecto de parallax para las estrellas
+  const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1, 1.5]);
+
+  // Colores para cada sección
+  const sectionColors = {
+    'sobre-mi': 'menta',
+    'proyectos': 'coral',
+    'experiencia': 'mostaza',
+    'contacto': 'celeste'
+  };
+
+  // Actualizar sección activa y progreso basado en scroll
+  useEffect(() => {
+    const handleScroll = () => {
+      const sections = document.querySelectorAll('section');
+      const scrollPosition = window.scrollY + window.innerHeight / 2;
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      const currentProgress = (window.scrollY / totalHeight) * 100;
+
+      setScrollProgress(currentProgress);
+
+      sections.forEach((section) => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.offsetHeight;
+        const sectionId = section.id as UniverseSection;
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          setActiveSection(sectionId);
+        }
+      });
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  // Variantes de animación para las secciones
+  const sectionVariants = {
+    hidden: { opacity: 0, y: 50 },
+    visible: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -50 }
+  };
+
   return (
-    <div className="relative min-h-screen bg-black text-white selection:bg-[#FF69B4] selection:text-black">
-      {/* Hero Section */}
-      <header className="min-h-screen flex items-center justify-center px-4 sm:px-6">
-        <div className="absolute inset-0 grid grid-cols-[1fr,2fr,1fr] opacity-5">
-          <div className="border-r border-white"></div>
-          <div className="border-r border-white"></div>
-        </div>
-        <div className="w-full max-w-[1400px] grid lg:grid-cols-[1.5fr,1fr] gap-12">
-          <div className="space-y-12">
-            <div>
-              <p className="font-mono text-[#FF69B4] text-sm sm:text-base tracking-[0.2em] mb-3 pl-1">BUENOS AIRES, AR</p>
-              <h2 className="font-mono text-[#00B140] text-base sm:text-lg tracking-[0.2em] mb-6">QA ENGINEER & CREATIVE TECHNOLOGIST</h2>
-              <h1 className="font-syne text-6xl sm:text-7xl md:text-8xl lg:text-[10rem] font-bold tracking-tight leading-[0.9] -ml-1 sm:-ml-2">
-                JUAN GRAVANO
-              </h1>
-            </div>
-            <div className="space-y-6 max-w-2xl pl-1">
-              <p className="text-lg sm:text-xl text-zinc-400 font-mono leading-relaxed">
-                Explorando la intersección entre tecnología y creatividad. 
-                Construyo soluciones que combinan precisión técnica con expresión artística.
+    <div ref={containerRef} className="relative min-h-screen bg-negro text-crema">
+      {/* Fondo con partículas */}
+      <div className="fixed inset-0 z-0">
+        <motion.div style={{ y: backgroundY, scale: backgroundScale }}>
+          <SpaceBackground
+            color={activeSection ? sectionColors[activeSection] : 'celeste'}
+            density={20}
+          />
+        </motion.div>
+      </div>
+
+      {/* Animación de carga inicial (despegue) */}
+      <motion.div
+        className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-negro"
+        initial={{ opacity: 1 }}
+        animate={{ opacity: isLoading ? 1 : 0 }}
+        transition={{ duration: 1 }}
+        style={{ pointerEvents: isLoading ? 'auto' : 'none' }}
+      >
+        <motion.div
+          className="w-32 h-32 bg-coral rounded-full"
+          animate={{
+            y: [0, -100, -500],
+            scale: [1, 1.2, 0.5],
+            opacity: [1, 1, 0]
+          }}
+          transition={{ duration: 2.5, ease: "easeInOut" }}
+        />
+        <motion.h1
+          className="mt-8 text-4xl terminal-text text-center"
+          animate={{ opacity: [0, 1, 0] }}
+          transition={{ duration: 2.5 }}
+        >
+          INICIANDO VIAJE
+          <br />
+          <span className="text-xl opacity-70">juan.software</span>
+        </motion.h1>
+        <motion.div
+          className="mt-8 h-2 bg-negro border border-crema w-64 overflow-hidden"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <motion.div
+            className="h-full bg-crema"
+            initial={{ width: 0 }}
+            animate={{ width: "100%" }}
+            transition={{ duration: 2.5, ease: "linear" }}
+          />
+        </motion.div>
+      </motion.div>
+
+      {/* Contenido principal */}
+      <div className="relative z-10">
+        {/* Header fijo */}
+        <header className="fixed top-0 left-0 right-0 z-20 bg-negro bg-opacity-50 backdrop-blur-sm">
+          <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 className="text-2xl terminal-text">juan.software</h1>
+            <nav className="flex space-x-6">
+              <a href="#sobre-mi" className={`text-sm terminal-text transition-colors ${activeSection === 'sobre-mi' ? 'text-menta' : 'text-crema hover:text-menta'}`}>SOBRE MÍ</a>
+              <a href="#proyectos" className={`text-sm terminal-text transition-colors ${activeSection === 'proyectos' ? 'text-coral' : 'text-crema hover:text-coral'}`}>PROYECTOS</a>
+              <a href="#experiencia" className={`text-sm terminal-text transition-colors ${activeSection === 'experiencia' ? 'text-mostaza' : 'text-crema hover:text-mostaza'}`}>EXPERIENCIA</a>
+              <a href="#contacto" className={`text-sm terminal-text transition-colors ${activeSection === 'contacto' ? 'text-celeste' : 'text-crema hover:text-celeste'}`}>CONTACTO</a>
+            </nav>
+          </div>
+        </header>
+
+        {/* Barra de progreso */}
+        <motion.div
+          className="fixed left-0 top-0 h-1 bg-crema z-30"
+          style={{ width: `${scrollProgress}%` }}
+          initial={{ width: 0 }}
+        />
+
+        {/* Secciones */}
+        <main className="pt-20">
+          {/* Intro */}
+          <section className="min-h-screen flex items-center justify-center">
+            <motion.div
+              className="text-center"
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 1, delay: 0.5 }}
+            >
+              <h2 className="text-6xl terminal-text mb-6">BIENVENIDO AL UNIVERSO</h2>
+              <p className="text-xl terminal-text opacity-80 max-w-2xl mx-auto mb-12">
+                Explora mi universo creativo haciendo scroll para descubrir más sobre mi perfil,
+                proyectos, experiencia y formas de contacto.
               </p>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
-                <SmoothScroll 
-                  href="#about"
-                  className="inline-block px-8 py-4 bg-[#00B140] text-black font-mono hover:bg-white transition-colors text-center"
-                >
-                  DESCUBRIR MÁS
-                </SmoothScroll>
-                <SmoothScroll
-                  href="#contact"
-                  className="inline-block px-8 py-4 border border-[#FF69B4] text-[#FF69B4] font-mono hover:bg-[#FF69B4] hover:text-black transition-colors text-center"
-                >
-                  CONTACTO
-                </SmoothScroll>
-              </div>
-            </div>
-          </div>
-          <div className="hidden lg:block">
-            <div className="bg-[#00B140] aspect-square relative">
-              <div className="absolute inset-0 bg-black/20"></div>
-              <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-30"></div>
-            </div>
-          </div>
-        </div>
-      </header>
+              <motion.div
+                className="animate-bounce"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 2 }}
+              >
+                <svg className="w-8 h-8 mx-auto text-crema" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                </svg>
+              </motion.div>
+            </motion.div>
+          </section>
 
-      {/* About Section */}
-      <section id="about" className="py-24 sm:py-32 bg-[#FF69B4] text-black relative">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto relative">
-          <div className="grid lg:grid-cols-[1fr,2fr] gap-8 sm:gap-16 items-start">
-            <div>
-              <p className="font-mono tracking-[0.2em] mb-4 text-black/70">01 —</p>
-              <h2 className="font-syne text-4xl sm:text-6xl font-bold tracking-tight">SOBRE<br/>MÍ</h2>
-            </div>
-            <div className="space-y-8 text-lg sm:text-xl font-mono">
-              <p className="leading-relaxed">
-                Soy un profesional multifacético que encuentra inspiración en la diversidad. 
-                Mi background en ingeniería de software y QA me dio las herramientas para construir 
-                soluciones robustas, mientras que mi pasión por el arte y la tecnología me impulsa 
-                a explorar nuevas formas de expresión digital.
-              </p>
-              <p className="leading-relaxed">
-                Me motiva la idea de crear experiencias que combinen funcionalidad con creatividad, 
-                siempre buscando desafiar los límites de lo convencional.
-              </p>
-            </div>
+          {/* Secciones principales */}
+          <AnimatePresence mode="wait">
+            <motion.section
+              id="sobre-mi"
+              className="min-h-screen py-20"
+              variants={sectionVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              exit="exit"
+            >
+              <div className="container mx-auto px-4">
+                <SobreMiContent />
+              </div>
+            </motion.section>
+
+            <motion.section
+              id="proyectos"
+              className="min-h-screen py-20"
+              variants={sectionVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              exit="exit"
+            >
+              <div className="container mx-auto px-4">
+                <ProyectosContent />
+              </div>
+            </motion.section>
+
+            <motion.section
+              id="experiencia"
+              className="min-h-screen py-20"
+              variants={sectionVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              exit="exit"
+            >
+              <div className="container mx-auto px-4">
+                <ExperienciaContent />
+              </div>
+            </motion.section>
+
+            <motion.section
+              id="contacto"
+              className="min-h-screen py-20"
+              variants={sectionVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              exit="exit"
+            >
+              <div className="container mx-auto px-4">
+                <ContactoContent />
+              </div>
+            </motion.section>
+          </AnimatePresence>
+        </main>
+
+        {/* Footer */}
+        <footer className="relative z-10 border-t border-crema border-opacity-20 py-6">
+          <div className="container mx-auto px-4 text-center">
+            <p className="terminal-text text-sm opacity-70">
+              © {new Date().getFullYear()} juan.software | Diseñado con <span className="text-coral">♥</span> en Buenos Aires
+            </p>
           </div>
-        </div>
-      </section>
-
-      {/* What I Do Section */}
-      <section className="py-24 sm:py-32 bg-black relative">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto relative">
-          <div className="grid lg:grid-cols-[1fr,2fr] gap-8 sm:gap-16 items-start">
-            <div>
-              <p className="font-mono tracking-[0.2em] mb-4 text-[#00B140]/70">02 —</p>
-              <h2 className="font-syne text-4xl sm:text-6xl font-bold tracking-tight text-[#00B140]">LO QUE<br/>HAGO</h2>
-            </div>
-            <div className="grid gap-12 sm:gap-16">
-              <div className="group">
-                <h3 className="font-syne text-2xl sm:text-3xl font-bold mb-6 group-hover:text-[#00B140] transition-colors">QUALITY ENGINEERING</h3>
-                <p className="text-lg sm:text-xl text-zinc-400 font-mono leading-relaxed">
-                  Diseño y desarrollo soluciones de testing que priorizan tanto la eficiencia como la experiencia del desarrollador. 
-                  Mi enfoque combina automatización inteligente con arquitecturas modulares y mantenibles.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-2xl sm:text-3xl font-bold mb-6 group-hover:text-[#FF69B4] transition-colors">CREATIVE TECHNOLOGY</h3>
-                <p className="text-lg sm:text-xl text-zinc-400 font-mono leading-relaxed">
-                  Desarrollo proyectos en la intersección entre código y arte, explorando nuevas formas 
-                  de visualizar datos y crear experiencias interactivas que desafían lo convencional.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Approach Section (replacing Skills) */}
-      <section className="py-24 sm:py-32 bg-[#00B140] relative">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto relative">
-          <div className="grid lg:grid-cols-[1fr,2fr] gap-8 sm:gap-16 items-start">
-            <div>
-              <p className="font-mono tracking-[0.2em] mb-4 text-black/70">03 —</p>
-              <h2 className="font-syne text-4xl sm:text-6xl font-bold tracking-tight">ENFOQUE &<br/>PROCESO</h2>
-            </div>
-            <div className="space-y-12">
-              <div className="group">
-                <h3 className="font-syne text-2xl sm:text-3xl font-bold mb-6">DISEÑO CENTRADO EN LA EXPERIENCIA</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Creo en construir soluciones que no solo funcionen bien, sino que sean intuitivas y 
-                  agradables de usar. Cada proyecto es una oportunidad para mejorar la experiencia 
-                  del equipo y del usuario final.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-2xl sm:text-3xl font-bold mb-6">INNOVACIÓN PRÁCTICA</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Busco el balance entre la innovación y la practicidad. Me apasiona explorar nuevas 
-                  tecnologías y enfoques, siempre manteniendo el foco en entregar valor real y 
-                  soluciones sostenibles.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-2xl sm:text-3xl font-bold mb-6">COLABORACIÓN & APRENDIZAJE</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  El desarrollo de software es un esfuerzo colectivo. Priorizo la colaboración abierta, 
-                  el intercambio de conocimientos y el aprendizaje continuo como pilares fundamentales 
-                  de mi trabajo.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Interests Section */}
-      <section className="py-24 sm:py-32 bg-[#FF69B4] relative">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-10"></div>
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto relative">
-          <div className="grid lg:grid-cols-[1fr,2fr] gap-8 sm:gap-16 items-start">
-            <div>
-              <p className="font-mono tracking-[0.2em] mb-4 text-black/70">04 —</p>
-              <h2 className="font-syne text-4xl sm:text-6xl font-bold tracking-tight text-black">OTROS<br/>INTERESES</h2>
-            </div>
-            <div className="grid md:grid-cols-2 gap-8 sm:gap-12 text-black">
-              <div className="group">
-                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">ARTE DIGITAL</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Me gusta transformar datos en experiencias visuales únicas. Estoy explorando el arte generativo y sus infinitas posibilidades creativas.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">GASTRONOMÍA</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Disfruto experimentar en la cocina, desde el café de especialidad hasta la creación de pizzas napolitanas perfectas en casa.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">CONEXIÓN CON EL MAR</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  El mar es una fuente constante de inspiración para mí. Me atraen su inmensidad, su calma y su capacidad de renovar la mente. Siempre busco formas de integrar su esencia en mi vida y proyectos creativos.
-                </p>
-              </div>
-              <div className="group">
-                <h3 className="font-syne text-xl sm:text-2xl font-bold mb-4 group-hover:text-white transition-colors">BIENESTAR</h3>
-                <p className="text-lg sm:text-xl font-mono leading-relaxed">
-                  Estoy aprendiendo a equilibrar hábitos, productividad y calidad de vida a través de la nutrición, el ejercicio y la autoconciencia.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="py-24 sm:py-32 bg-black relative">
-        <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5"></div>
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto text-center relative">
-          <p className="font-mono text-[#FF69B4] tracking-[0.2em] mb-6">05 —</p>
-          <h2 className="font-syne text-4xl sm:text-6xl font-bold tracking-tight mb-12 sm:mb-16">CONECTEMOS</h2>
-          <div className="flex gap-6 sm:gap-8 justify-center">
-          <a
-            href="https://github.com/jgravano"
-            target="_blank"
-            rel="noopener noreferrer"
-              className="p-4 sm:p-6 bg-[#00B140] text-black hover:bg-white transition-colors"
-          >
-              <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-            </svg>
-          </a>
-          <a
-            href="https://linkedin.com/in/juan-gravano"
-            target="_blank"
-            rel="noopener noreferrer"
-              className="p-4 sm:p-6 bg-[#FF69B4] text-black hover:bg-white transition-colors"
-          >
-              <svg className="w-6 h-6 sm:w-8 sm:h-8" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-            </svg>
-          </a>
-        </div>
-        </div>
-      </section>
-
-      <footer className="py-6 sm:py-8 bg-black text-center text-zinc-600 text-base sm:text-lg font-mono border-t border-zinc-900">
-        <div className="px-4 sm:px-6 w-full max-w-[1400px] mx-auto">
-          © {new Date().getFullYear()} | made with ❤️ by juan.software
-        </div>
-      </footer>
+        </footer>
+      </div>
     </div>
   );
 }
