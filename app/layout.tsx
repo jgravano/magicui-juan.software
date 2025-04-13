@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import localFont from "next/font/local";
+import { ThemeProvider } from 'next-themes';
 import { Syne } from 'next/font/google';
+import localFont from "next/font/local";
 import Script from 'next/script';
 import "./globals.css";
 
@@ -16,8 +17,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Juan Gravano — QA Engineer & Creative Technologist",
-  description: "Explorando la intersección entre tecnología y creatividad. QA Engineer y Creative Technologist basado en Buenos Aires, especializado en automatización y proyectos creativos.",
+  title: "juan.software",
+  description: "Experiencia digital interactiva",
   icons: {
     icon: [
       {
@@ -27,19 +28,15 @@ export const metadata: Metadata = {
     ],
   },
   keywords: [
-    "Juan Gravano",
-    "QA Engineer",
-    "Creative Technologist",
-    "Buenos Aires",
-    "Quality Engineering",
-    "Creative Technology",
-    "Test Automation",
-    "Digital Art",
-    "Software Engineering"
+    "Diseño Experimental",
+    "Minimalismo",
+    "Experiencia Digital",
+    "Interacción",
+    "Arte Digital"
   ],
   authors: [{ name: "Juan Gravano" }],
   creator: "Juan Gravano",
-  publisher: "Juan Gravano",
+  publisher: "juan.software",
   formatDetection: {
     email: false,
     address: false,
@@ -49,14 +46,14 @@ export const metadata: Metadata = {
     type: "website",
     locale: "es_AR",
     url: "https://juan.software",
-    title: "Juan Gravano — QA Engineer & Creative Technologist",
-    description: "Explorando la intersección entre tecnología y creatividad. QA Engineer y Creative Technologist basado en Buenos Aires.",
-    siteName: "Juan Gravano",
+    title: "juan.software",
+    description: "Experiencia digital interactiva",
+    siteName: "juan.software",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Juan Gravano — QA Engineer & Creative Technologist",
-    description: "Explorando la intersección entre tecnología y creatividad. QA Engineer y Creative Technologist basado en Buenos Aires.",
+    title: "juan.software",
+    description: "Experiencia digital interactiva",
   },
   robots: {
     index: true,
@@ -81,7 +78,9 @@ export default function RootLayout({
       <body
         className={`${syne.variable} ${geistMono.variable} font-sans antialiased bg-black`}
       >
-        {children}
+        <ThemeProvider attribute="data-theme" defaultTheme="default" enableColorScheme={false}>
+          {children}
+        </ThemeProvider>
         
         {/* Google Analytics */}
         <Script

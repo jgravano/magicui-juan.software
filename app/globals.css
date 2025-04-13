@@ -67,3 +67,220 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Base de todos los temas con transición */
+:root {
+  --primary: #4f67b1;
+  --secondary: #ffd7b9;
+  --background: #f9f7f4;
+  --text: #222222;
+  --text-muted: rgba(34, 34, 34, 0.6);
+  --glow-intensity: 0;
+
+  transition: all 400ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Tema por defecto - modernista neutro */
+[data-theme='default'] {
+  --primary: #4f67b1;
+  --secondary: #ffd7b9;
+  --background: #f9f7f4;
+  --text: #222222;
+  --text-muted: rgba(34, 34, 34, 0.6);
+  --glow-intensity: 0;
+}
+
+/* Tema Bauhaus - inspirado en el póster verde */
+[data-theme='bauhaus'] {
+  --primary: #0a7e3d;
+  --secondary: #0a2e1d;
+  --background: #f4f2e6;
+  --text: #131313;
+  --text-muted: rgba(19, 19, 19, 0.7);
+  --glow-intensity: 0;
+}
+
+/* Tema riso - colores brillantes de serigrafía */
+[data-theme='riso'] {
+  --primary: #ff4f4f;
+  --secondary: #0065e3;
+  --background: #fff9ea;
+  --text: #000000;
+  --text-muted: rgba(0, 0, 0, 0.7);
+  --glow-intensity: 0;
+}
+
+/* Tema Space Age - retro futurista */
+[data-theme='space'] {
+  --primary: #95d30a;
+  --secondary: #ff5c1b;
+  --background: #121212;
+  --text: #ffffff;
+  --text-muted: rgba(255, 255, 255, 0.7);
+  --glow-intensity: 0;
+}
+
+/* Tema arquitectónico - inspirado en los colores de interiores modernos */
+[data-theme='archi'] {
+  --primary: #4f67b1;
+  --secondary: #b44b28;
+  --background: #ffd7b9;
+  --text: #383838;
+  --text-muted: rgba(56, 56, 56, 0.7);
+  --glow-intensity: 0;
+}
+
+/* Efecto de selección de texto */
+::selection {
+  background-color: var(--secondary);
+  color: var(--background);
+}
+
+/* Animación de gradiente para fondos */
+@keyframes gradientAnimation {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Clases para efectos de brillo según la intensidad del tema */
+.glow-text {
+  text-shadow: 0 0 calc(10px * var(--glow-intensity)) var(--primary);
+}
+
+.glow-accent {
+  text-shadow: 0 0 calc(10px * var(--glow-intensity)) var(--secondary);
+}
+
+/* Animación de aparición para los elementos */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.6s ease forwards;
+}
+
+/* Cursor personalizado - reemplazo global */
+.custom-cursor {
+  cursor: none !important;
+}
+
+/* Asegurar que los elementos clickeables no muestren el cursor por defecto */
+.custom-cursor a,
+.custom-cursor button,
+.custom-cursor [role='button'],
+.custom-cursor input,
+.custom-cursor label,
+.custom-cursor select,
+.custom-cursor textarea {
+  cursor: none !important;
+}
+
+/* Desactivar el cursor personalizado en dispositivos táctiles */
+@media (hover: none) {
+  .custom-cursor {
+    cursor: auto !important;
+  }
+
+  .custom-cursor a,
+  .custom-cursor button,
+  .custom-cursor [role='button'],
+  .custom-cursor input,
+  .custom-cursor label,
+  .custom-cursor select,
+  .custom-cursor textarea {
+    cursor: auto !important;
+  }
+}
+
+/* Animación de pulso más fuerte para el tema seleccionado */
+@keyframes pulse-strong {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  70% {
+    transform: scale(1.1);
+    box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+  }
+}
+
+.animate-pulse-strong {
+  animation: pulse-strong 1.5s infinite;
+}
+
+/* Animación para el indicador central */
+.pulse-animation {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.3);
+  }
+}
+
+/* Animación para las partículas dentro del tema activo */
+@keyframes particle {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+        calc(cos(var(--angle, 0deg)) * 15px),
+        calc(sin(var(--angle, 90deg)) * 15px)
+      )
+      scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-particle {
+  --angle: calc(var(--index, 0) * 72deg);
+  animation: particle 2s ease-out infinite;
+}
+
+/* Transición de tema con flash */
+.theme-transition {
+  animation: theme-flash 0.5s ease-out;
+}
+
+@keyframes theme-flash {
+  0% {
+    background-color: rgba(255, 255, 255, 0);
+  }
+  10% {
+    background-color: rgba(255, 255, 255, 0.1);
+  }
+  100% {
+    background-color: rgba(255, 255, 255, 0);
+  }
+}
