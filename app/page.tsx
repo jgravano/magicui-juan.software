@@ -302,7 +302,7 @@ export default function Home() {
         {/* Footer con texto minimalista */}
         <footer className="absolute bottom-5 w-full text-center text-xs text-[var(--text-muted)] font-mono fade-in" style={{ animationDelay: "0.6s" }}>
           <div className="px-4 w-full max-w-md mx-auto">
-            © {new Date().getFullYear()} | Diseño Modernista
+            © {new Date().getFullYear()} 
           </div>
         </footer>
       </main>
