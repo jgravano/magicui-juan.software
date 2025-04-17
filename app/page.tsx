@@ -201,9 +201,16 @@ export default function Home() {
         {/* Contenido central */}
         <div className="relative z-10 flex flex-col items-center justify-center px-4 space-y-24">
           {/* Logo/Marca - estilo tipográfico Bauhaus */}
-          <div className="text-center transition-transform duration-300 hover:scale-105 fade-in"
-               onMouseEnter={() => setIsHovering("logo")}
-               onMouseLeave={() => setIsHovering("")}>
+          <div className={`text-center transition-transform duration-300 hover:scale-105 fade-in ${
+             theme === 'Bauhaus' ? 'mt-2' : 
+             theme === 'Midcentury' ? 'mt-4' : 
+             theme === 'Terminal' ? 'mt-6' : 
+             theme === 'Dopamine' ? 'mt-4' : 
+             theme === 'Neobrutal' ? 'mt-8 neobrutal-logo' : ''
+           }`}
+           data-magnetic="true"
+           onMouseEnter={() => setIsHovering("logo")}
+           onMouseLeave={() => setIsHovering("")}>
             <h1 className="font-syne text-5xl md:text-8xl font-bold tracking-tight">
               <span className="text-[var(--primary)]">juan</span>
               <span className="text-[var(--text)]">.</span>
@@ -216,9 +223,10 @@ export default function Home() {
             <a href="https://github.com/jgravano" 
                target="_blank" 
                rel="noopener noreferrer"
+               data-magnetic="true"
                onMouseEnter={() => setIsHovering("github")}
                onMouseLeave={() => setIsHovering("")}
-               className="relative group">
+               className={`relative group ${theme === 'Midcentury' ? 'rounded-md px-1' : ''}`}>
               <span className="block p-4 text-xl transition-all duration-300 group-hover:text-[var(--primary)]">
                 GitHub
               </span>
@@ -228,6 +236,7 @@ export default function Home() {
             <a href="https://linkedin.com/in/juan-gravano" 
                target="_blank" 
                rel="noopener noreferrer"
+               data-magnetic="true"
                onMouseEnter={() => setIsHovering("linkedin")}
                onMouseLeave={() => setIsHovering("")}
                className="relative group">
@@ -238,6 +247,7 @@ export default function Home() {
             </a>
             
             <a href="mailto:contacto@juan.software" 
+               data-magnetic="true"
                onMouseEnter={() => setIsHovering("email")}
                onMouseLeave={() => setIsHovering("")}
                className="relative group">
@@ -251,50 +261,44 @@ export default function Home() {
           {/* Selector de temas - formas geométricas simples inspiradas en Bauhaus */}
           <div className="w-full max-w-xl px-4 fade-in" style={{ animationDelay: "0.4s" }}>
             <div className="flex justify-between items-center">
-              {themes.map((colorTheme) => (
-                <button
-                  key={colorTheme.name}
-                  onClick={() => {
-                    setTheme(colorTheme.name);
-                    localStorage.setItem("selectedTheme", colorTheme.name);
-                  }}
-                  onMouseEnter={() => setIsHovering(`theme-${colorTheme.name}`)}
-                  onMouseLeave={() => setIsHovering("")}
-                  className={`relative transform transition-all duration-400`}
-                  aria-label={`Tema ${colorTheme.label}`}
-                >
-                  {/* Forma geométrica según el tema */}
-                  <div
+              {themes.map((themeOption) => {
+                const isActive = theme === themeOption.name;
+                return (
+                  <button
+                    key={themeOption.name}
+                    data-magnetic="true"
+                    onClick={() => {
+                      setTheme(themeOption.name);
+                      localStorage.setItem("selectedTheme", themeOption.name);
+                    }}
                     className={`
-                      w-16 h-16 md:w-20 md:h-20 
-                      transition-transform duration-300
-                      ${theme === colorTheme.name ? "scale-105" : "hover:scale-110"}
-                      ${colorTheme.name === 'bauhaus' ? 'rounded-full' : 
-                         colorTheme.name === 'riso' ? 'rounded-none' : 
-                         colorTheme.name === 'space' ? 'rounded-tr-[50%] rounded-bl-[50%]' : 
-                         colorTheme.name === 'archi' ? 'rounded-tl-[50%]' : 'rounded-[10%]'}
+                      relative flex items-center justify-center ${themeOption.name === 'Bauhaus' ? 'rounded-none' : 
+                                                              themeOption.name === 'Neobrutal' ? 'neobrutal-button' : 
+                                                              'rounded-full'} w-20 h-20 
+                      transition-all duration-500 ease-out
+                      ${isActive ? 'shadow-lg scale-110 ring-3 ring-[var(--primary)]' : 'hover:scale-105'}
                     `}
                     style={{
-                      background: `linear-gradient(135deg, ${colorTheme.primaryColor}, ${colorTheme.secondaryColor})`,
-                      border: theme === colorTheme.name ? `2px solid ${colorTheme.textColor}` : 'none',
-                      transform: `rotate(${theme === colorTheme.name ? '0deg' : '0deg'})`,
+                      backgroundColor: themeOption.backgroundColor,
+                      fontFamily: `var(--font-${themeOption.name.toLowerCase().replace(' ', '-')})`
                     }}
+                    aria-label={`Cambiar al tema ${themeOption.name}`}
                   >
                     {/* Indicador minimalista para el tema activo */}
-                    {theme === colorTheme.name && (
+                    {theme === themeOption.name && (
                       <div className="absolute inset-0 flex items-center justify-center">
                         <div className={`
-                          ${colorTheme.name === 'bauhaus' ? 'w-3 h-3 rounded-none' : 
-                             colorTheme.name === 'riso' ? 'w-3 h-3 rounded-full' : 
-                             colorTheme.name === 'space' ? 'w-3 h-3 rounded-tr-[50%]' : 
+                          ${themeOption.name === 'bauhaus' ? 'w-3 h-3 rounded-none' : 
+                             themeOption.name === 'riso' ? 'w-3 h-3 rounded-full' : 
+                             themeOption.name === 'space' ? 'w-3 h-3 rounded-tr-[50%]' : 
                              'w-3 h-3 rounded-[25%]'}
                           bg-[var(--background)] opacity-90
                         `}></div>
                       </div>
                     )}
-                  </div>
-                </button>
-              ))}
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

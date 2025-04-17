@@ -1,6 +1,7 @@
+import CursorEffects from "@/components/magicui/cursor-effects";
 import type { Metadata } from "next";
 import { ThemeProvider } from 'next-themes';
-import { Syne } from 'next/font/google';
+import { Courier_Prime, JetBrains_Mono, Playfair_Display, Poppins, Space_Grotesk, Syne } from 'next/font/google';
 import localFont from "next/font/local";
 import Script from 'next/script';
 import "./globals.css";
@@ -14,6 +15,38 @@ const geistMono = localFont({
   src: "./fonts/GeistMonoVF.woff",
   variable: "--font-geist-mono",
   weight: "100 900",
+});
+
+const courierPrime = Courier_Prime({
+  subsets: ['latin'],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: '--font-courier-prime',
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ['latin'],
+  display: "swap",
+  variable: '--font-jetbrains-mono',
+});
+
+const spaceGrotesk = Space_Grotesk({
+  subsets: ['latin'],
+  display: "swap",
+  variable: '--font-space-grotesk',
+});
+
+const playfairDisplay = Playfair_Display({
+  subsets: ['latin'],
+  display: "swap",
+  variable: '--font-playfair-display',
+});
+
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  variable: '--font-poppins',
 });
 
 export const metadata: Metadata = {
@@ -76,10 +109,12 @@ export default function RootLayout({
   return (
     <html lang="es" className="scroll-smooth">
       <body
-        className={`${syne.variable} ${geistMono.variable} font-sans antialiased bg-black`}
+        className={`${syne.variable} ${geistMono.variable} ${courierPrime.variable} ${jetbrainsMono.variable} ${spaceGrotesk.variable} ${playfairDisplay.variable} ${poppins.variable} font-sans antialiased bg-black`}
       >
         <ThemeProvider attribute="data-theme" defaultTheme="default" enableColorScheme={false}>
-          {children}
+          <CursorEffects>
+            {children}
+          </CursorEffects>
         </ThemeProvider>
         
         {/* Google Analytics */}
