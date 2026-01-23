@@ -94,7 +94,7 @@ export function Projects() {
                     aria-hidden={openIndex === index}
                   >
                     <span className="flip-card__pattern" aria-hidden="true">
-                      {Array.from({ length: 9 }).map((_, lineIndex) => (
+                      {Array.from({ length: 10 }).map((_, lineIndex) => (
                         <span key={`${project.category}-pattern-${lineIndex}`} className="flip-card__pattern-line">
                           {Array.from({ length: 6 }).fill(project.category).join(" ")}
                         </span>

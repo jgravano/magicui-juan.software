@@ -44,14 +44,13 @@ export function Hero() {
 
         {/* Tagline */}
         <p
-          className="text-lg md:text-xl text-muted-foreground max-w-md mx-auto leading-relaxed"
+          className="text-sm md:text-base text-muted-foreground max-w-md mx-auto leading-relaxed"
           style={{
             opacity: isLoaded ? 1 : 0,
-            transform: isLoaded ? 'translateY(0)' : 'translateY(24px)',
-            transition: `opacity ${DURATION.slow}ms ${EASING.default} 700ms, transform ${DURATION.slow}ms ${EASING.default} 700ms`,
+            transition: `opacity ${DURATION.fast}ms ${EASING.default} 200ms`,
           }}
         >
-          I design systems that hold under pressure.
+          I work on systems, quality, and the parts most people avoid.
         </p>
 
         {/* Scroll Indicator */}
