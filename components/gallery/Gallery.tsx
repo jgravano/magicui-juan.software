@@ -7,10 +7,14 @@ import { GALLERY_PIECES, type GalleryPiece } from '@/lib/gallery-content';
 import { Floor } from './Floor';
 import { CameraRig } from './CameraRig';
 import { Piece } from './Piece';
+import { AboutMonolith } from './AboutMonolith';
+import { ContactTerminal } from './ContactTerminal';
 import { Particles } from './effects/Particles';
 import { PostProcessing } from './effects/PostProcessing';
+import { BackgroundShader } from './effects/BackgroundShader';
 import { PieceOverlay } from './PieceOverlay';
 import { PieceLabel } from './ui/PieceLabel';
+import { GalleryHUD } from './ui/GalleryHUD';
 import { EntryTransition } from './EntryTransition';
 
 interface SceneProps {
@@ -34,8 +38,6 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
         shadow-mapSize-width={GALLERY.performance.shadowMapSize}
         shadow-mapSize-height={GALLERY.performance.shadowMapSize}
       />
-
-      {/* Accent spotlight */}
       <spotLight
         color={GALLERY.colors.accentLight}
         intensity={GALLERY.lighting.accent}
@@ -45,6 +47,9 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
         castShadow
         target-position={[0, 0, 0]}
       />
+
+      {/* Generative background */}
+      <BackgroundShader />
 
       {/* Project pieces */}
       {GALLERY_PIECES.map((piece) => (
@@ -58,10 +63,16 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
         </group>
       ))}
 
-      {/* Floor with shader grid */}
+      {/* About monolith */}
+      <AboutMonolith />
+
+      {/* Contact terminal */}
+      <ContactTerminal />
+
+      {/* Floor */}
       <Floor />
 
-      {/* Ambient dust particles */}
+      {/* Ambient particles */}
       <Particles />
 
       {/* Camera */}
@@ -104,6 +115,9 @@ export function Gallery() {
           />
         </Suspense>
       </Canvas>
+
+      {/* HUD */}
+      {entered && <GalleryHUD />}
 
       {/* Project detail overlay */}
       {selectedPiece && (
