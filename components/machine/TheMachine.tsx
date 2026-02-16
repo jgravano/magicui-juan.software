@@ -274,25 +274,24 @@ export function TheMachine() {
   /* ── Win98 window drag ── */
   const onPopupPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>, id: number) => {
     e.stopPropagation();
-    const pointerId = e.pointerId;
     const popup = popups.find(p => p.id === id);
     if (!popup) return;
 
     const rect = e.currentTarget.getBoundingClientRect();
     const startX = popup.dragged ? popup.x : rect.left;
     const startY = popup.dragged ? popup.y : rect.top;
-    const offsetX = e.clientX - startX;
-    const offsetY = e.clientY - startY;
-    dragRef.current = { id, offsetX, offsetY };
+    const oX = e.clientX - startX;
+    const oY = e.clientY - startY;
+    dragRef.current = { id, offsetX: oX, offsetY: oY };
     setPopups(prev => prev.map(p => p.id === id ? { ...p, dragged: true, x: startX, y: startY } : p));
 
     const move = (ev: PointerEvent) => {
-      if (!dragRef.current) return;
-      setPopups(prev => prev.map(p =>
-        p.id === dragRef.current!.id
-          ? { ...p, x: ev.clientX - dragRef.current!.offsetX, y: ev.clientY - dragRef.current!.offsetY }
-          : p
-      ));
+      const drag = dragRef.current;
+      if (!drag) return;
+      const nx = ev.clientX - drag.offsetX;
+      const ny = ev.clientY - drag.offsetY;
+      const did = drag.id;
+      setPopups(prev => prev.map(p => p.id === did ? { ...p, x: nx, y: ny } : p));
     };
     const cleanup = () => {
       dragRef.current = null;
@@ -307,33 +306,36 @@ export function TheMachine() {
 
   /* ── Close window — Paint trolls (dodge 3x), regular windows may respawn ── */
   const onPopupClose = useCallback((id: number) => {
-    setPopups(prev => {
-      const popup = prev.find(p => p.id === id);
-      if (!popup) return prev;
-      // Paint window trolls: dodges away from cursor 3x
-      if (popup.body === null && popup.dodgeCount < 3) {
-        return prev.map(p => p.id === id ? {
-          ...p,
-          x: p.x + (Math.random() > 0.5 ? 1 : -1) * (120 + Math.random() * 100),
-          y: p.y + (Math.random() > 0.5 ? 1 : -1) * (80 + Math.random() * 60),
-          dodgeCount: p.dodgeCount + 1,
-          dragged: true,
-        } : p);
-      }
-      // Regular windows or Paint after 3 dodges: close for real
-      // But closing a regular window may spawn a revenge popup (max 2 total)
-      if (popup.body !== null && respawnCount.current < 2) {
-        const revenge = REVENGE_POPUPS[respawnCount.current];
-        respawnCount.current++;
-        const rx = 60 + Math.random() * 300;
-        const ry = 40 + Math.random() * 300;
-        setTimeout(() => {
-          setPopups(p => [...p, { ...revenge, x: rx, y: ry, dragged: true }]);
-        }, 1200);
-      }
-      return prev.filter(p => p.id !== id);
-    });
-  }, []);
+    // Read popup state to decide side effects BEFORE the state update
+    const popup = popups.find(p => p.id === id);
+    if (!popup) return;
+
+    // Paint window trolls: dodges away from cursor 3x
+    if (popup.body === null && popup.dodgeCount < 3) {
+      setPopups(prev => prev.map(p => p.id === id ? {
+        ...p,
+        x: p.x + (Math.random() > 0.5 ? 1 : -1) * (120 + Math.random() * 100),
+        y: p.y + (Math.random() > 0.5 ? 1 : -1) * (80 + Math.random() * 60),
+        dodgeCount: p.dodgeCount + 1,
+        dragged: true,
+      } : p));
+      return;
+    }
+
+    // Close for real
+    setPopups(prev => prev.filter(p => p.id !== id));
+
+    // Closing a regular window may spawn a revenge popup (max 2 total)
+    if (popup.body !== null && respawnCount.current < 2) {
+      const revenge = REVENGE_POPUPS[respawnCount.current];
+      respawnCount.current++;
+      const rx = 60 + Math.random() * 300;
+      const ry = 40 + Math.random() * 300;
+      setTimeout(() => {
+        setPopups(prev => [...prev, { ...revenge, x: rx, y: ry, dragged: true }]);
+      }, 1200);
+    }
+  }, [popups]);
 
   const norm = leverY / maxLever;
   const bgColor = phase === 'facade' ? '#FAFAFA' : 'var(--m-bg)';
