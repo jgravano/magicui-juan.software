@@ -1,26 +1,31 @@
 import React from "react"
 import type { Metadata } from 'next'
-import { Source_Serif_4, Inter } from 'next/font/google'
+import { Source_Serif_4, Inter, JetBrains_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
 import './globals.css'
 import CustomCursor from "./components/CustomCursor"
 
-const sourceSerif = Source_Serif_4({ 
+const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   variable: '--font-serif',
   display: 'swap',
 });
 
-const inter = Inter({ 
+const inter = Inter({
   subsets: ["latin"],
   variable: '--font-sans',
   display: 'swap',
 });
 
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: '--font-mono',
+  display: 'swap',
+});
+
 export const metadata: Metadata = {
-  title: 'Juan Gravano — Quality Engineer',
-  description: 'I design and build testing and product systems focused on reliability, performance and clarity.',
-  generator: 'v0.app',
+  title: 'JUAN GRAVANO — THE MACHINE',
+  description: 'I work on systems, quality, and the parts most people avoid. Pull the lever.',
   icons: {
     icon: [
       {
@@ -47,7 +52,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${sourceSerif.variable} font-sans antialiased`}>
+      <body className={`${inter.variable} ${sourceSerif.variable} ${jetbrainsMono.variable} font-sans antialiased`}>
         <CustomCursor />
         {children}
         <Analytics />
