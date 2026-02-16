@@ -2,7 +2,7 @@ export const MACHINE_CONTENT = {
   hero: {
     name: 'JUAN GRAVANO',
     instruction: 'PULL. OR LEAVE.',
-    sticker: "I DON'T DO LINKEDIN CAROUSELS",
+    sticker: 'BREAK THINGS ON PURPOSE',
   },
   statement: {
     lines: [
@@ -115,9 +115,9 @@ export const MACHINE_CONTENT = {
   contact: {
     message: "I DON'T TAKE EVERY PROJECT.\nI TAKE THE INTERESTING ONES.",
     links: [
-      { label: 'LINKEDIN', href: 'https://linkedin.com', freq: '01' },
-      { label: 'GITHUB', href: 'https://github.com', freq: '02' },
-      { label: 'EMAIL', href: 'mailto:hello@example.com', freq: '03' },
+      { label: 'LINKEDIN', href: 'https://linkedin.com/in/juan-gravano', freq: '01' },
+      { label: 'GITHUB', href: 'https://github.com/jgravano', freq: '02' },
+      { label: 'EMAIL', href: 'mailto:juangravano@gmail.com', freq: '03' },
     ],
   },
   footer: {

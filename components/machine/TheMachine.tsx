@@ -53,8 +53,10 @@ export function TheMachine() {
   const [openProject, setOpenProject] = useState<number | null>(null);
   const [transmitted, setTransmitted] = useState(false);
   const [bugCount, setBugCount] = useState(0);
+  const [thresholdCrossed, setThresholdCrossed] = useState(false);
   const statementRef = useRef<HTMLDivElement>(null);
   const stickerTriggered = useRef(false);
+  const thresholdTriggered = useRef(false);
   const dragRef = useRef<{ id: number; offsetX: number; offsetY: number } | null>(null);
   const maxLever = 160;
 
@@ -79,13 +81,31 @@ export function TheMachine() {
     const startY = e.clientY;
     const startL = leverY;
     setDragging(true);
-    const move = (ev: PointerEvent) => setLeverY(Math.max(0, Math.min(maxLever, startL + ev.clientY - startY)));
+    const move = (ev: PointerEvent) => {
+      const next = Math.max(0, Math.min(maxLever, startL + ev.clientY - startY));
+      setLeverY(next);
+      // Threshold detection (bidirectional)
+      const crossed = next / maxLever >= 0.75;
+      if (crossed && !thresholdTriggered.current) {
+        thresholdTriggered.current = true;
+        setThresholdCrossed(true);
+        if (navigator.vibrate) navigator.vibrate(30);
+      } else if (!crossed && thresholdTriggered.current) {
+        thresholdTriggered.current = false;
+        setThresholdCrossed(false);
+      }
+    };
     const up = () => {
       el.removeEventListener('pointermove', move);
       el.removeEventListener('pointerup', up);
       el.removeEventListener('pointercancel', up);
       setDragging(false);
-      setLeverY((cur) => { if (cur / maxLever > 0.75) { setEntered(true); return maxLever; } return 0; });
+      setLeverY((cur) => {
+        if (cur / maxLever > 0.75) { setEntered(true); return maxLever; }
+        thresholdTriggered.current = false;
+        setThresholdCrossed(false);
+        return 0;
+      });
     };
     el.addEventListener('pointermove', move, { passive: true });
     el.addEventListener('pointerup', up);
@@ -225,15 +245,16 @@ export function TheMachine() {
   /* ── Win98 window drag ── */
   const onPopupPointerDown = useCallback((e: React.PointerEvent<HTMLDivElement>, id: number) => {
     e.stopPropagation();
-    const el = e.currentTarget;
-    el.setPointerCapture(e.pointerId);
+    const pointerId = e.pointerId;
     const popup = popups.find(p => p.id === id);
     if (!popup) return;
 
-    const rect = el.getBoundingClientRect();
+    const rect = e.currentTarget.getBoundingClientRect();
     const startX = popup.dragged ? popup.x : rect.left;
     const startY = popup.dragged ? popup.y : rect.top;
-    dragRef.current = { id, offsetX: e.clientX - startX, offsetY: e.clientY - startY };
+    const offsetX = e.clientX - startX;
+    const offsetY = e.clientY - startY;
+    dragRef.current = { id, offsetX, offsetY };
     setPopups(prev => prev.map(p => p.id === id ? { ...p, dragged: true, x: startX, y: startY } : p));
 
     const move = (ev: PointerEvent) => {
@@ -244,13 +265,15 @@ export function TheMachine() {
           : p
       ));
     };
-    const up = () => {
+    const cleanup = () => {
       dragRef.current = null;
-      el.removeEventListener('pointermove', move);
-      el.removeEventListener('pointerup', up);
+      document.removeEventListener('pointermove', move);
+      document.removeEventListener('pointerup', cleanup);
+      document.removeEventListener('pointercancel', cleanup);
     };
-    el.addEventListener('pointermove', move, { passive: true });
-    el.addEventListener('pointerup', up);
+    document.addEventListener('pointermove', move, { passive: true });
+    document.addEventListener('pointerup', cleanup);
+    document.addEventListener('pointercancel', cleanup);
   }, [popups]);
 
   /* ── Close window — Paint windows troll (dodge 2x before closing) ── */
@@ -367,14 +390,83 @@ export function TheMachine() {
 
           {/* Lever */}
           {!entered && (
-            <div className="mt-16 flex flex-col items-center gap-5 z-20">
-              <span style={{ fontFamily: 'var(--font-serif)', fontSize: 14, fontStyle: 'italic', color: '#bbb' }}>scroll down</span>
-              <div className="relative" style={{ width: 1, height: maxLever, background: '#ddd' }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: leverY, background: '#999', transition: dragging ? 'none' : 'height 400ms ease' }} />
-                <div data-cursor="grab" onPointerDown={onLeverDown}
-                  style={{ position: 'absolute', left: '50%', top: leverY, transform: 'translate(-50%, -50%)', width: 48, height: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'grab', touchAction: 'none', userSelect: 'none', transition: dragging ? 'none' : 'top 400ms ease' }}>
-                  <div style={{ width: 32, height: 2, background: dragging ? '#666' : '#bbb', transition: 'background 150ms ease' }} />
+            <div className={`mt-16 flex flex-col items-center gap-5 z-20${thresholdCrossed ? ' lever-committed' : ''}`}>
+              <span className="t-label" style={{
+                color: dragging ? (thresholdCrossed ? 'var(--m-orange)' : '#666') : '#aaa',
+                transition: 'color 200ms ease',
+              }}>{c.hero.instruction}</span>
+
+              <div className="relative flex items-start">
+                {/* Track */}
+                <div className="relative" style={{
+                  width: 4,
+                  height: maxLever,
+                  background: '#eee',
+                  border: '1px solid #ddd',
+                  borderRadius: 2,
+                }}>
+                  {/* Fill */}
+                  <div style={{
+                    position: 'absolute', top: 0, left: 0, width: '100%',
+                    height: leverY,
+                    background: thresholdCrossed ? 'var(--m-orange)' : (norm > 0.01 ? `color-mix(in srgb, #bbb ${Math.round((1 - norm) * 100)}%, #111)` : '#bbb'),
+                    transition: dragging ? 'background 150ms ease' : 'height 400ms ease, background 150ms ease',
+                    borderRadius: 2,
+                  }} />
+
+                  {/* Threshold marker — appears after 30% progress */}
+                  <div style={{
+                    position: 'absolute',
+                    top: maxLever * 0.75,
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    width: 14,
+                    height: 1,
+                    background: thresholdCrossed ? 'var(--m-orange)' : '#ccc',
+                    opacity: norm > 0.3 ? 0.6 : 0,
+                    transition: 'opacity 300ms ease, background 200ms ease',
+                  }} />
+
+                  {/* Handle hit area (48x48 invisible) + visible handle */}
+                  <div data-cursor="grab" onPointerDown={onLeverDown}
+                    style={{
+                      position: 'absolute', left: '50%', top: leverY,
+                      transform: dragging
+                        ? 'translate(-50%, -50%) scaleX(1.1)'
+                        : 'translate(-50%, -50%)',
+                      width: 48, height: 48,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      cursor: 'grab', touchAction: 'none', userSelect: 'none',
+                      transition: dragging ? 'transform 150ms ease' : 'top 400ms ease, transform 150ms ease',
+                      animation: !dragging && leverY === 0 ? 'lever-bob 2.5s ease-in-out infinite' : 'none',
+                    }}>
+                    {/* Visible handle rectangle */}
+                    <div style={{
+                      width: 40, height: 14,
+                      background: thresholdCrossed ? 'var(--m-orange)' : (norm > 0.01 ? `color-mix(in srgb, #bbb ${Math.round((1 - norm) * 100)}%, #111)` : '#bbb'),
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+                      transition: 'background 150ms ease',
+                    }}>
+                      {/* 3 grip lines */}
+                      <div style={{ width: 16, height: 1, background: 'rgba(255,255,255,0.4)' }} />
+                      <div style={{ width: 16, height: 1, background: 'rgba(255,255,255,0.4)' }} />
+                      <div style={{ width: 16, height: 1, background: 'rgba(255,255,255,0.4)' }} />
+                    </div>
+                  </div>
                 </div>
+
+                {/* Percentage counter — appears during drag */}
+                {dragging && (
+                  <span className="t-label" style={{
+                    position: 'absolute',
+                    left: 'calc(50% + 34px)',
+                    top: leverY,
+                    transform: 'translateY(-50%)',
+                    color: thresholdCrossed ? 'var(--m-orange)' : '#999',
+                    whiteSpace: 'nowrap',
+                    transition: 'color 150ms ease',
+                  }}>{Math.round(norm * 100)}%</span>
+                )}
               </div>
             </div>
           )}
@@ -466,7 +558,7 @@ export function TheMachine() {
                 <div className="relative overflow-hidden" style={{ height: 'clamp(160px, 25vw, 240px)', background: 'var(--m-black)' }}>
                   <span className="t-display absolute whitespace-nowrap select-none"
                     style={{ fontSize: 'clamp(3.5rem, 11vw, 9rem)', color: 'var(--m-yellow)', top: '50%', left: '50%', transform: 'translate(-50%, -50%) rotate(-3deg)', opacity: 0.9 }}>
-                    I DON&apos;T DO LINKEDIN CAROUSELS
+                    BREAK THINGS ON PURPOSE
                   </span>
                 </div>
               </>
