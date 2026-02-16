@@ -1,9 +1,13 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import { GALLERY } from '@/lib/gallery-config';
+import { Floor } from './Floor';
+import { CameraRig } from './CameraRig';
+import { Particles } from './effects/Particles';
+import { PostProcessing } from './effects/PostProcessing';
+import { EntryTransition } from './EntryTransition';
 
 function Scene() {
   return (
@@ -22,49 +26,55 @@ function Scene() {
         shadow-mapSize-height={GALLERY.performance.shadowMapSize}
       />
 
-      {/* Proof-of-life object */}
-      <mesh position={[0, 1.5, 0]} castShadow>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshStandardMaterial color={GALLERY.colors.accentLight} />
-      </mesh>
-
-      {/* Floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[GALLERY.floor.size, GALLERY.floor.size]} />
-        <meshStandardMaterial color={GALLERY.colors.floor} />
-      </mesh>
-
-      {/* Grid */}
-      <gridHelper
-        args={[
-          GALLERY.floor.size,
-          GALLERY.floor.gridDivisions,
-          GALLERY.colors.floorGrid,
-          GALLERY.colors.floorGrid,
-        ]}
-        position={[0, 0.001, 0]}
+      {/* Accent spotlight — aimed at center where pieces will go */}
+      <spotLight
+        color={GALLERY.colors.accentLight}
+        intensity={GALLERY.lighting.accent}
+        position={[0, 8, 0]}
+        angle={0.6}
+        penumbra={0.8}
+        castShadow
+        target-position={[0, 0, 0]}
       />
 
-      {/* Camera controls */}
-      <OrbitControls
-        enableDamping
-        dampingFactor={0.05}
-        minDistance={GALLERY.camera.minDistance}
-        maxDistance={GALLERY.camera.maxDistance}
-        minPolarAngle={GALLERY.camera.minPolarAngle}
-        maxPolarAngle={GALLERY.camera.maxPolarAngle}
-        target={[...GALLERY.camera.lookAt]}
-      />
+      {/* Proof-of-life object — will be replaced by Pieces in M2 */}
+      <mesh position={[0, 1, 0]} castShadow>
+        <boxGeometry args={[0.8, 0.8, 0.8]} />
+        <meshStandardMaterial
+          color={GALLERY.colors.accentLight}
+          emissive={GALLERY.colors.accentLight}
+          emissiveIntensity={0.15}
+        />
+      </mesh>
+
+      {/* Floor with shader grid */}
+      <Floor />
+
+      {/* Ambient dust particles */}
+      <Particles />
+
+      {/* Camera */}
+      <CameraRig />
 
       {/* Fog */}
       <fog attach="fog" args={[GALLERY.colors.fog, GALLERY.fog.near, GALLERY.fog.far]} />
+
+      {/* Post-processing */}
+      <PostProcessing />
     </>
   );
 }
 
 export function Gallery() {
+  const [entered, setEntered] = useState(false);
+
+  const handleEnter = useCallback(() => {
+    setEntered(true);
+  }, []);
+
   return (
     <div style={{ width: '100vw', height: '100vh', background: GALLERY.colors.background }}>
+      {/* 3D Canvas — always mounted for preloading */}
       <Canvas
         shadows
         dpr={[...GALLERY.performance.dpr]}
@@ -80,6 +90,9 @@ export function Gallery() {
           <Scene />
         </Suspense>
       </Canvas>
+
+      {/* Entry overlay — fades out on enter */}
+      {!entered && <EntryTransition onEnter={handleEnter} />}
     </div>
   );
 }
