@@ -3,13 +3,22 @@
 import { Suspense, useState, useCallback } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { GALLERY } from '@/lib/gallery-config';
+import { GALLERY_PIECES, type GalleryPiece } from '@/lib/gallery-content';
 import { Floor } from './Floor';
 import { CameraRig } from './CameraRig';
+import { Piece } from './Piece';
 import { Particles } from './effects/Particles';
 import { PostProcessing } from './effects/PostProcessing';
+import { PieceOverlay } from './PieceOverlay';
+import { PieceLabel } from './ui/PieceLabel';
 import { EntryTransition } from './EntryTransition';
 
-function Scene() {
+interface SceneProps {
+  onPieceClick: (piece: GalleryPiece) => void;
+  selectedId: string | null;
+}
+
+function Scene({ onPieceClick, selectedId }: SceneProps) {
   return (
     <>
       {/* Lighting */}
@@ -26,7 +35,7 @@ function Scene() {
         shadow-mapSize-height={GALLERY.performance.shadowMapSize}
       />
 
-      {/* Accent spotlight — aimed at center where pieces will go */}
+      {/* Accent spotlight */}
       <spotLight
         color={GALLERY.colors.accentLight}
         intensity={GALLERY.lighting.accent}
@@ -37,15 +46,17 @@ function Scene() {
         target-position={[0, 0, 0]}
       />
 
-      {/* Proof-of-life object — will be replaced by Pieces in M2 */}
-      <mesh position={[0, 1, 0]} castShadow>
-        <boxGeometry args={[0.8, 0.8, 0.8]} />
-        <meshStandardMaterial
-          color={GALLERY.colors.accentLight}
-          emissive={GALLERY.colors.accentLight}
-          emissiveIntensity={0.15}
-        />
-      </mesh>
+      {/* Project pieces */}
+      {GALLERY_PIECES.map((piece) => (
+        <group key={piece.id}>
+          <Piece
+            piece={piece}
+            onClick={onPieceClick}
+            selected={selectedId === piece.id}
+          />
+          <PieceLabel piece={piece} />
+        </group>
+      ))}
 
       {/* Floor with shader grid */}
       <Floor />
@@ -67,14 +78,14 @@ function Scene() {
 
 export function Gallery() {
   const [entered, setEntered] = useState(false);
+  const [selectedPiece, setSelectedPiece] = useState<GalleryPiece | null>(null);
 
-  const handleEnter = useCallback(() => {
-    setEntered(true);
-  }, []);
+  const handleEnter = useCallback(() => setEntered(true), []);
+  const handlePieceClick = useCallback((piece: GalleryPiece) => setSelectedPiece(piece), []);
+  const handleCloseOverlay = useCallback(() => setSelectedPiece(null), []);
 
   return (
     <div style={{ width: '100vw', height: '100vh', background: GALLERY.colors.background }}>
-      {/* 3D Canvas — always mounted for preloading */}
       <Canvas
         shadows
         dpr={[...GALLERY.performance.dpr]}
@@ -87,11 +98,19 @@ export function Gallery() {
         gl={{ antialias: true, alpha: false }}
       >
         <Suspense fallback={null}>
-          <Scene />
+          <Scene
+            onPieceClick={handlePieceClick}
+            selectedId={selectedPiece?.id ?? null}
+          />
         </Suspense>
       </Canvas>
 
-      {/* Entry overlay — fades out on enter */}
+      {/* Project detail overlay */}
+      {selectedPiece && (
+        <PieceOverlay piece={selectedPiece} onClose={handleCloseOverlay} />
+      )}
+
+      {/* Entry overlay */}
       {!entered && <EntryTransition onEnter={handleEnter} />}
     </div>
   );
