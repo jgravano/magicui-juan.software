@@ -14,18 +14,46 @@ const WIN98_WINDOWS: PopupState[] = [
   },
   {
     id: 1,
-    title: 'untitled - Paint',
-    body: null, // paint window — special render (trolls on close)
-    x: 60, y: 280,
+    title: 'todo.txt - Notepad',
+    body: '1. Fix bugs\n2. Ship features\n3. Fix the bugs you shipped\n4. Repeat forever\n5. ???\n6. IPO',
+    x: 220, y: 160,
     dodgeCount: 0,
   },
   {
     id: 2,
+    title: 'untitled - Paint',
+    body: null, // paint window — special render (trolls on close)
+    x: 60, y: 300,
+    dodgeCount: 0,
+  },
+  {
+    id: 3,
     title: 'deploy_friday.bat',
     body: 'DEPLOYING TO PROD ON A FRIDAY\n\ngit push --force\n¯\\_(ツ)_/¯\n\nLGTM 👍 (didn\'t read)',
     x: 380, y: 80,
     dodgeCount: 0,
   },
+  {
+    id: 4,
+    title: 'warning.dll',
+    body: 'WARNING: Closing this window will\nnot fix your problems.\n\nThey are structural.',
+    x: 140, y: 420,
+    dodgeCount: 0,
+  },
+  {
+    id: 5,
+    title: 'meeting_notes.doc',
+    body: 'MEETING AGENDA:\n\n• Discuss the meeting\n• Schedule the next meeting\n• Meeting about meetings\n\nAction items: MORE MEETINGS',
+    x: 440, y: 260,
+    dodgeCount: 0,
+  },
+];
+
+/* Revenge popups — spawned when user closes regular windows */
+const REVENGE_POPUPS: Omit<PopupState, 'x' | 'y'>[] = [
+  { id: 100, title: 'task_manager.exe', body: 'Task Manager is not responding.\n\nWould you like to wait?\n\n(you have no choice)', dodgeCount: 0 },
+  { id: 101, title: 'comeback.exe', body: 'You thought you could close me?\n\nI respawn.\nLike bugs in production.', dodgeCount: 0 },
+  { id: 102, title: 'clipboard.exe', body: 'I copied your clipboard.\n\nJust kidding.\n\n...or did I?', dodgeCount: 0 },
 ];
 
 interface PopupState {
@@ -57,6 +85,7 @@ export function TheMachine() {
   const statementRef = useRef<HTMLDivElement>(null);
   const stickerTriggered = useRef(false);
   const thresholdTriggered = useRef(false);
+  const respawnCount = useRef(0);
   const dragRef = useRef<{ id: number; offsetX: number; offsetY: number } | null>(null);
   const maxLever = 160;
 
@@ -218,10 +247,10 @@ export function TheMachine() {
       bsodScrollCount.current++;
       if (bsodScrollCount.current >= 3) {
         setShowBSOD(false);
-        // After BSOD: broken state immediately, popups cascade in projects
+        // After BSOD: broken state immediately, popups cascade one by one
         setPhase('broken');
         WIN98_WINDOWS.forEach((w, i) => {
-          setTimeout(() => setPopups(prev => [...prev, w]), i * 700);
+          setTimeout(() => setPopups(prev => [...prev, w]), i * 1800);
         });
       }
     };
@@ -276,22 +305,32 @@ export function TheMachine() {
     document.addEventListener('pointercancel', cleanup);
   }, [popups]);
 
-  /* ── Close window — Paint windows troll (dodge 2x before closing) ── */
+  /* ── Close window — Paint trolls (dodge 3x), regular windows may respawn ── */
   const onPopupClose = useCallback((id: number) => {
     setPopups(prev => {
       const popup = prev.find(p => p.id === id);
       if (!popup) return prev;
-      // Paint window trolls: dodges away from cursor
-      if (popup.body === null && popup.dodgeCount < 2) {
+      // Paint window trolls: dodges away from cursor 3x
+      if (popup.body === null && popup.dodgeCount < 3) {
         return prev.map(p => p.id === id ? {
           ...p,
           x: p.x + (Math.random() > 0.5 ? 1 : -1) * (120 + Math.random() * 100),
           y: p.y + (Math.random() > 0.5 ? 1 : -1) * (80 + Math.random() * 60),
           dodgeCount: p.dodgeCount + 1,
-          dragged: true, // switch to fixed so it stays visible
+          dragged: true,
         } : p);
       }
-      // Regular windows or Paint after 2 dodges: close for real
+      // Regular windows or Paint after 3 dodges: close for real
+      // But closing a regular window may spawn a revenge popup (max 2 total)
+      if (popup.body !== null && respawnCount.current < 2) {
+        const revenge = REVENGE_POPUPS[respawnCount.current];
+        respawnCount.current++;
+        const rx = 60 + Math.random() * 300;
+        const ry = 40 + Math.random() * 300;
+        setTimeout(() => {
+          setPopups(p => [...p, { ...revenge, x: rx, y: ry, dragged: true }]);
+        }, 1200);
+      }
       return prev.filter(p => p.id !== id);
     });
   }, []);
@@ -648,7 +687,7 @@ export function TheMachine() {
                             background: '#fff',
                           }}>
                             <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, color: '#808080', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                              {popup.dodgeCount === 0 ? '[ canvas ]' : popup.dodgeCount === 1 ? '[ nice try ]' : '[ ok fine ]'}
+                              {popup.dodgeCount === 0 ? '[ canvas ]' : popup.dodgeCount === 1 ? '[ nice try ]' : popup.dodgeCount === 2 ? '[ seriously? ]' : '[ ok fine ]'}
                             </span>
                           </div>
                           <div style={{ padding: '4px 6px', display: 'flex', gap: 2, flexWrap: 'wrap', borderTop: '1px solid #fff' }}>
