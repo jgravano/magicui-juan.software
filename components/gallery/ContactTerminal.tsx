@@ -1,66 +1,58 @@
 'use client';
 
-import { useRef, useState } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
-import * as THREE from 'three';
 
 /**
- * A floating terminal screen in the gallery — contact links.
- * Looks like a CRT monitor displaying links.
+ * Wall-mounted terminal on the right wall — contact links.
  */
 export function ContactTerminal() {
-  const ref = useRef<THREE.Mesh>(null);
-  const [hovered, setHovered] = useState(false);
-
-  useFrame((state) => {
-    if (!ref.current) return;
-    const t = state.clock.elapsedTime;
-    ref.current.position.y = 1.4 + Math.sin(t * 0.5 + 2) * 0.03;
-    ref.current.rotation.y = -0.3 + Math.sin(t * 0.2) * 0.02;
-  });
-
   return (
-    <group position={[7, 0, -4]}>
-      {/* Screen frame */}
-      <mesh ref={ref} position={[0, 1.4, 0]}>
-        <boxGeometry args={[2.2, 1.5, 0.08]} />
-        <meshStandardMaterial color="#0a0a0a" roughness={0.8} />
+    <group position={[11.7, 3.5, -4]} rotation={[0, -Math.PI / 2, 0]}>
+      {/* Screen bezel */}
+      <mesh>
+        <boxGeometry args={[2.4, 1.7, 0.1]} />
+        <meshStandardMaterial color="#080808" roughness={0.8} metalness={0.1} />
       </mesh>
 
-      {/* Screen surface with glow */}
-      <mesh position={[0, 1.4, 0.045]}>
-        <planeGeometry args={[2, 1.3]} />
-        <meshBasicMaterial color="#050a05" />
+      {/* Screen face */}
+      <mesh position={[0, 0, 0.06]}>
+        <planeGeometry args={[2.1, 1.4]} />
+        <meshBasicMaterial color="#030a03" />
       </mesh>
 
-      {/* HTML content on screen */}
+      {/* HTML content */}
       <Html
-        position={[0, 1.4, 0.06]}
+        position={[0, 0, 0.08]}
         transform
-        distanceFactor={5}
-        style={{ pointerEvents: hovered ? 'auto' : 'none', width: 240 }}
+        distanceFactor={5.5}
+        style={{ pointerEvents: 'auto', width: 240 }}
       >
-        <div
-          onMouseEnter={() => setHovered(true)}
-          onMouseLeave={() => setHovered(false)}
-          style={{
-            fontFamily: 'var(--font-mono), monospace',
-            color: '#39ff14',
-            userSelect: 'none',
-            padding: 4,
-          }}
-        >
+        <div style={{
+          fontFamily: 'var(--font-mono), monospace',
+          color: '#39ff14',
+          userSelect: 'none',
+          padding: 4,
+        }}>
           <div style={{
             fontSize: 8,
             fontWeight: 600,
             textTransform: 'uppercase',
             letterSpacing: '0.14em',
-            color: '#39ff14',
-            marginBottom: 8,
-            opacity: 0.6,
+            marginBottom: 10,
+            opacity: 0.5,
           }}>
-            {'>'} OPEN CHANNELS_
+            {'>'} CONTACT_
+          </div>
+
+          <div style={{
+            fontSize: 9,
+            lineHeight: 1.6,
+            color: '#39ff14',
+            opacity: 0.4,
+            marginBottom: 10,
+          }}>
+            I DON&apos;T TAKE EVERY PROJECT.<br />
+            I TAKE THE INTERESTING ONES.
           </div>
 
           {[
@@ -78,27 +70,28 @@ export function ContactTerminal() {
                 alignItems: 'center',
                 gap: 8,
                 textDecoration: 'none',
-                padding: '3px 0',
-                fontSize: 10,
+                padding: '4px 0',
+                fontSize: 11,
+                fontWeight: 700,
                 color: '#39ff14',
                 transition: 'color 150ms ease',
               }}
               onMouseEnter={(e) => { e.currentTarget.style.color = '#FF5C00'; }}
               onMouseLeave={(e) => { e.currentTarget.style.color = '#39ff14'; }}
             >
-              <span style={{ opacity: 0.4, fontSize: 8 }}>{link.prefix}</span>
-              <span style={{ width: 12, height: 1, background: 'currentColor', opacity: 0.3 }} />
-              <span style={{ fontWeight: 700, letterSpacing: '0.05em' }}>{link.label}</span>
+              <span style={{ opacity: 0.3, fontSize: 8 }}>{link.prefix}</span>
+              <span style={{ width: 16, height: 1, background: 'currentColor', opacity: 0.3 }} />
+              <span>{link.label}</span>
             </a>
           ))}
 
           <div style={{
-            marginTop: 10,
-            fontSize: 8,
-            color: '#39ff14',
-            opacity: 0.3,
+            marginTop: 12,
+            fontSize: 7,
+            opacity: 0.2,
+            letterSpacing: '0.1em',
           }}>
-            BUENOS AIRES — 2026
+            SYS READY — 2026
           </div>
         </div>
       </Html>
@@ -106,9 +99,9 @@ export function ContactTerminal() {
       {/* Screen glow */}
       <pointLight
         color="#39ff14"
-        intensity={0.15}
+        intensity={0.12}
         distance={4}
-        position={[0, 1.4, 0.5]}
+        position={[-1, 0, 0.5]}
       />
     </group>
   );

@@ -6,6 +6,7 @@ import { GALLERY } from '@/lib/gallery-config';
 import { GALLERY_PIECES, type GalleryPiece } from '@/lib/gallery-content';
 import { Floor } from './Floor';
 import { CameraRig } from './CameraRig';
+import { Architecture } from './Architecture';
 import { Piece } from './Piece';
 import { AboutMonolith } from './AboutMonolith';
 import { ContactTerminal } from './ContactTerminal';
@@ -15,7 +16,6 @@ import { BackgroundShader } from './effects/BackgroundShader';
 import { PieceOverlay } from './PieceOverlay';
 import { PieceLabel } from './ui/PieceLabel';
 import { GalleryHUD } from './ui/GalleryHUD';
-import { EntryTransition } from './EntryTransition';
 
 interface SceneProps {
   onPieceClick: (piece: GalleryPiece) => void;
@@ -25,33 +25,27 @@ interface SceneProps {
 function Scene({ onPieceClick, selectedId }: SceneProps) {
   return (
     <>
-      {/* Lighting */}
+      {/* Lighting — ambient base only, per-piece spots are in Architecture */}
       <ambientLight
         color={GALLERY.colors.ambientLight}
-        intensity={GALLERY.lighting.ambient}
+        intensity={0.08}
       />
       <directionalLight
         color={GALLERY.colors.directionalLight}
-        intensity={GALLERY.lighting.directional}
+        intensity={0.2}
         position={[5, 10, 5]}
         castShadow
         shadow-mapSize-width={GALLERY.performance.shadowMapSize}
         shadow-mapSize-height={GALLERY.performance.shadowMapSize}
       />
-      <spotLight
-        color={GALLERY.colors.accentLight}
-        intensity={GALLERY.lighting.accent}
-        position={[0, 8, 0]}
-        angle={0.6}
-        penumbra={0.8}
-        castShadow
-        target-position={[0, 0, 0]}
-      />
 
       {/* Generative background */}
       <BackgroundShader />
 
-      {/* Project pieces */}
+      {/* Architecture — walls, columns, pedestals, spotlights */}
+      <Architecture />
+
+      {/* Project pieces — on pedestals */}
       {GALLERY_PIECES.map((piece) => (
         <group key={piece.id}>
           <Piece
@@ -63,10 +57,10 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
         </group>
       ))}
 
-      {/* About monolith */}
+      {/* About — left wall */}
       <AboutMonolith />
 
-      {/* Contact terminal */}
+      {/* Contact — right wall */}
       <ContactTerminal />
 
       {/* Floor */}
@@ -75,11 +69,11 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
       {/* Ambient particles */}
       <Particles />
 
-      {/* Camera */}
+      {/* Camera with cinematic intro */}
       <CameraRig />
 
-      {/* Fog */}
-      <fog attach="fog" args={[GALLERY.colors.fog, GALLERY.fog.near, GALLERY.fog.far]} />
+      {/* Fog — tighter for more drama */}
+      <fog attach="fog" args={['#050505', 8, 35]} />
 
       {/* Post-processing */}
       <PostProcessing />
@@ -88,10 +82,8 @@ function Scene({ onPieceClick, selectedId }: SceneProps) {
 }
 
 export function Gallery() {
-  const [entered, setEntered] = useState(false);
   const [selectedPiece, setSelectedPiece] = useState<GalleryPiece | null>(null);
 
-  const handleEnter = useCallback(() => setEntered(true), []);
   const handlePieceClick = useCallback((piece: GalleryPiece) => setSelectedPiece(piece), []);
   const handleCloseOverlay = useCallback(() => setSelectedPiece(null), []);
 
@@ -104,7 +96,7 @@ export function Gallery() {
           fov: GALLERY.camera.fov,
           near: GALLERY.camera.near,
           far: GALLERY.camera.far,
-          position: [...GALLERY.camera.position],
+          position: [0, 1.8, 2], // cinematic start — close in
         }}
         gl={{ antialias: true, alpha: false }}
       >
@@ -117,15 +109,12 @@ export function Gallery() {
       </Canvas>
 
       {/* HUD */}
-      {entered && <GalleryHUD />}
+      <GalleryHUD />
 
       {/* Project detail overlay */}
       {selectedPiece && (
         <PieceOverlay piece={selectedPiece} onClose={handleCloseOverlay} />
       )}
-
-      {/* Entry overlay */}
-      {!entered && <EntryTransition onEnter={handleEnter} />}
     </div>
   );
 }

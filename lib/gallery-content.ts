@@ -1,6 +1,7 @@
 /* ================================================================
    Gallery v2 — Content & Spatial Layout
    Maps projects to 3D pieces with position, geometry, and color.
+   Positions are aligned with pedestals in Architecture.tsx.
    ================================================================ */
 
 export type PieceGeometry = 'box' | 'octahedron' | 'torus' | 'icosahedron';
@@ -32,9 +33,9 @@ export const GALLERY_PIECES: GalleryPiece[] = [
     color: '#FF5C00',
     emissive: '#FF5C00',
     geometry: 'box',
-    position: [-4, 1.2, -2],
+    position: [-4, 1.1, -3],      // on left pedestal (0.6 high + piece center)
     rotation: [0, Math.PI / 6, 0],
-    scale: 1,
+    scale: 0.9,
   },
   {
     id: 'bender',
@@ -47,9 +48,9 @@ export const GALLERY_PIECES: GalleryPiece[] = [
     color: '#E8D44D',
     emissive: '#E8D44D',
     geometry: 'octahedron',
-    position: [0, 1.5, -4],
+    position: [0, 0.9, -5],       // on center pedestal (0.3 high)
     rotation: [0.2, 0, 0.1],
-    scale: 0.9,
+    scale: 0.8,
   },
   {
     id: 'quality-processes',
@@ -62,9 +63,9 @@ export const GALLERY_PIECES: GalleryPiece[] = [
     color: '#D62828',
     emissive: '#D62828',
     geometry: 'torus',
-    position: [4.5, 1, -1.5],
+    position: [4, 1.5, -2.5],     // on tall right pedestal (0.9 high)
     rotation: [Math.PI / 4, 0, 0],
-    scale: 0.85,
+    scale: 0.75,
   },
   {
     id: 'experiments',
@@ -77,8 +78,8 @@ export const GALLERY_PIECES: GalleryPiece[] = [
     color: '#0038FF',
     emissive: '#0038FF',
     geometry: 'icosahedron',
-    position: [2, 1.8, -6],
+    position: [2, 1.2, -7],       // on back pedestal (0.5 high)
     rotation: [0, Math.PI / 3, 0.15],
-    scale: 0.75,
+    scale: 0.65,
   },
 ];
