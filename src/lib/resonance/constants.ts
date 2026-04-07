@@ -1,0 +1,150 @@
+export const MIN_CANVAS_WIDTH = 1;
+export const MIN_CANVAS_HEIGHT = 1;
+export const MAX_DEVICE_PIXEL_RATIO = 2;
+
+export const MAX_FRAME_DELTA_SECONDS = 1 / 24;
+
+// Input sampling / smoothing
+export const INPUT_SPEED_RESPONSE = 14;
+export const INPUT_IDLE_VELOCITY_DAMPING = 10;
+export const INPUT_MIN_MOVEMENT_DISTANCE = 0.0001;
+
+// Cursor feel / look
+export const CURSOR_SPRING_STIFFNESS = 680;
+export const CURSOR_SPRING_DAMPING = 58;
+export const CURSOR_BASE_RADIUS = 4.2;
+export const CURSOR_MAX_RADIUS_BOOST = 2.1;
+export const CURSOR_SPEED_FOR_MAX_RADIUS = 1200;
+export const CURSOR_OPACITY_VISIBLE = 0.95;
+export const CURSOR_OPACITY_HIDDEN = 0.0;
+export const CURSOR_OPACITY_RESPONSE = 14;
+export const CURSOR_GLOW_RADIUS_MULTIPLIER = 3.2;
+export const CURSOR_CORE_COLOR = "rgba(246, 250, 255, 0.98)";
+export const CURSOR_GLOW_COLOR = "rgba(152, 181, 255, 0.30)";
+export const CURSOR_TRAIL_COLOR = "rgba(184, 206, 255, 0.46)";
+export const CURSOR_TRAIL_MIN_LENGTH = 8;
+export const CURSOR_TRAIL_MAX_LENGTH = 46;
+export const CURSOR_TRAIL_SPEED_SCALE = 0.028;
+export const CURSOR_TRAIL_WIDTH = 1.45;
+export const CURSOR_SPARK_OFFSET_MULTIPLIER = 1.9;
+export const CURSOR_SPARK_RADIUS_MULTIPLIER = 0.56;
+export const CURSOR_SPARK_COLOR = "rgba(255, 255, 255, 0.70)";
+
+// Particle field layout
+export const PARTICLE_CLUSTER_SIDE_RATIO = 0.42;
+export const PARTICLE_CLUSTER_MIN_SIDE = 260;
+export const PARTICLE_CLUSTER_MARGIN = 80;
+export const PARTICLE_MAX_COUNT = 6800;
+export const PARTICLE_GRID_SPACING = 4.2;
+export const PARTICLE_GRID_JITTER = 1.1;
+export const PARTICLE_MIN_RADIUS = 0.42;
+export const PARTICLE_MAX_RADIUS = 1.1;
+export const PARTICLE_MIN_ALPHA = 0.18;
+export const PARTICLE_MAX_ALPHA = 0.5;
+export const PARTICLE_COLOR = "rgba(210, 224, 255, 1)";
+export const PARTICLE_TWINKLE_AMPLITUDE = 0.2;
+export const PARTICLE_TWINKLE_FREQUENCY = 0.45;
+export const PARTICLE_TWINKLE_MIN_MULTIPLIER = 0.72;
+export const PARTICLE_TWINKLE_MAX_MULTIPLIER = 1.16;
+export const PARTICLE_REACTION_ALPHA_BOOST = 0.65;
+export const PARTICLE_REACTION_SIZE_BOOST = 0.58;
+export const PARTICLE_REACTION_OFFSET_SCALE = 96;
+export const PARTICLE_TRAIL_ALPHA = 0.18;
+export const PARTICLE_TRAIL_WIDTH = 0.72;
+export const PARTICLE_TRAIL_MAX_LENGTH = 18;
+
+// Particle motion
+export const PARTICLE_MAGNET_RADIUS = 260;
+export const PARTICLE_MAGNET_PULL_STRENGTH = 3400;
+export const PARTICLE_MAGNET_PUSH_STRENGTH = 5200;
+export const PARTICLE_MAGNET_DEAD_ZONE = 22;
+export const PARTICLE_RETURN_STRENGTH = 10.6;
+export const PARTICLE_FRICTION = 4.4;
+export const PARTICLE_MAX_SPEED = 1800;
+export const PARTICLE_MOTION_INTENSITY_SPEED = 900;
+export const PARTICLE_MOTION_INTENSITY_BOOST = 1.8;
+export const PARTICLE_DAMAGE_ACCUMULATION = 0.00006;
+export const PARTICLE_DAMAGE_RECOVERY = 0.9;
+export const PARTICLE_DAMAGE_RETURN_REDUCTION = 0.42;
+export const PARTICLE_DAMAGE_FRICTION_REDUCTION = 0.2;
+export const PARTICLE_DAMAGE_ALPHA_BOOST = 0.12;
+export const PARTICLE_DAMAGE_SIZE_BOOST = 0.16;
+export const PARTICLE_SNAPBACK_DISTANCE = 120;
+export const PARTICLE_SNAPBACK_STRENGTH = 0.24;
+
+// Pulse shockwave physics (visual ring intentionally removed)
+export const PULSE_LIFETIME_SECONDS = 0.72;
+export const PULSE_START_RADIUS = 14;
+export const PULSE_END_RADIUS = 320;
+export const PULSE_PUSH_STRENGTH = 9200;
+export const PULSE_PUSH_BAND_WIDTH = 46;
+export const PULSE_PUSH_TRAIL_BOOST = 0.22;
+export const PULSE_DIRECTIONAL_PUSH_BONUS = 0.55;
+export const PULSE_DIRECTIONAL_PUSH_BACK_REDUCTION = 0.38;
+export const PULSE_TURBULENCE_STRENGTH = 0.22;
+export const PULSE_TURBULENCE_FREQUENCY = 3.6;
+export const PULSE_TURBULENCE_TIME_SPEED = 8.2;
+export const PULSE_RANDOM_DIRECTION_THRESHOLD = 120;
+export const PULSE_SWIRL_STRENGTH = 340;
+export const PULSE_DIRECTION_SEED_GOLDEN_ANGLE = 2.3999632297;
+export const PULSE_DIRECTION_SEED_TIME_FACTOR = 0.1;
+export const PULSE_TURBULENCE_PHASE_MULTIPLIER = 1.3;
+export const PULSE_TURBULENCE_PUSH_VARIATION = 0.18;
+export const PULSE_SWIRL_LIFE_MIN = 0.35;
+export const PULSE_SWIRL_LIFE_RANGE = 0.65;
+export const PULSE_IRREGULARITY_BASE = 0.78;
+export const PULSE_IRREGULARITY_RANGE = 0.44;
+export const PULSE_IRREGULARITY_ID_MULTIPLIER = 37;
+
+export const PARTICLE_MAGNET_PUSH_BASE_MULTIPLIER = 0.85;
+export const PARTICLE_MAGNET_PUSH_SPEED_MULTIPLIER = 1.3;
+
+// Composition overlays
+export const COMPOSITION_TOP_SHADE_ALPHA = 0.18;
+export const COMPOSITION_BOTTOM_SHADE_ALPHA = 0.24;
+export const COMPOSITION_GRAIN_ALPHA = 0.04;
+
+// Audio bed
+export const AUDIO_MASTER_GAIN = 0.7;
+export const AUDIO_DRONE_GAIN = 0.046;
+export const AUDIO_AIR_GAIN = 0.013;
+export const AUDIO_LOW_FREQUENCY_HZ = 58.27;
+export const AUDIO_HIGH_FREQUENCY_HZ = 97.99;
+export const AUDIO_BASE_FILTER_MIN_HZ = 260;
+export const AUDIO_BASE_FILTER_MAX_HZ = 640;
+export const AUDIO_AIR_FILTER_HZ = 1500;
+export const AUDIO_FILTER_LFO_FREQUENCY = 0.043;
+export const AUDIO_DRONE_BREATH_FREQUENCY = 0.058;
+export const AUDIO_REVERB_DECAY_SECONDS = 8;
+export const AUDIO_REVERB_WET = 0.34;
+export const AUDIO_MOD_SPEED_REFERENCE = 1400;
+export const AUDIO_MOD_RESPONSE = 9;
+export const AUDIO_MOD_FILTER_BOOST_HZ = 960;
+export const AUDIO_MOD_DRONE_GAIN_BOOST = 0.55;
+export const AUDIO_MOD_AIR_GAIN_BOOST = 2.2;
+export const AUDIO_MOD_AIR_FILTER_SWEEP_HZ = 560;
+export const AUDIO_MOD_REVERB_WET_BOOST = 0.16;
+export const AUDIO_MOD_DETUNE_CENTS = 16;
+
+// Audio click transient
+export const AUDIO_CLICK_GAIN = 0.18;
+export const AUDIO_CLICK_SPEED_REFERENCE = 1900;
+export const AUDIO_CLICK_FREQUENCY_MIN_HZ = 260;
+export const AUDIO_CLICK_FREQUENCY_MAX_HZ = 880;
+export const AUDIO_CLICK_DURATION_MIN_SECONDS = 0.04;
+export const AUDIO_CLICK_DURATION_MAX_SECONDS = 0.14;
+export const AUDIO_CLICK_FILTER_BASE_HZ = 1150;
+export const AUDIO_CLICK_FILTER_SWEEP_HZ = 1700;
+export const AUDIO_CLICK_VELOCITY_BASE = 0.22;
+export const AUDIO_CLICK_VELOCITY_BOOST = 0.72;
+
+// Background shading
+export const BACKGROUND_BASE_COLOR = "#050505";
+export const BACKGROUND_GLOW_INNER = "rgba(75, 98, 160, 0.24)";
+export const BACKGROUND_GLOW_OUTER = "rgba(14, 18, 30, 0.02)";
+export const BACKGROUND_VIGNETTE_EDGE = "rgba(0, 0, 0, 0.58)";
+
+export const BACKGROUND_GLOW_RADIUS_BASE = 0.56;
+export const BACKGROUND_GLOW_RADIUS_VARIATION = 0.1;
+export const BACKGROUND_BREATH_FREQUENCY = 0.22;
+export const BACKGROUND_DRIFT_DISTANCE = 34;
