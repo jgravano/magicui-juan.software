@@ -49,6 +49,79 @@ body {
   user-select: none;
 }
 
+.mirror-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+}
+
+.mirror-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.mirror-debug-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+}
+
+.mirror-debug {
+  position: fixed;
+  left: clamp(14px, 2.2vw, 24px);
+  bottom: clamp(14px, 2.2vw, 24px);
+  margin: 0;
+  padding: 11px 12px 10px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(0, 0, 0, 0.42);
+  color: rgba(255, 255, 255, 0.84);
+  font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  user-select: none;
+  pointer-events: none;
+}
+
+.mirror-debug__title,
+.mirror-debug__line,
+.mirror-debug__hint,
+.mirror-debug__notice {
+  margin: 0;
+}
+
+.mirror-debug__title {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.mirror-debug__line {
+  margin-top: 6px;
+  font-size: 8px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.mirror-debug__hint {
+  margin-top: 6px;
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.mirror-debug__notice {
+  margin-top: 7px;
+  max-width: 280px;
+  font-size: 8px;
+  line-height: 1.45;
+  color: rgba(255, 217, 184, 0.9);
+}
+
 .experiments-home {
   position: relative;
   height: 100vh;
@@ -151,6 +224,24 @@ body {
       transparent 44%
     ),
     radial-gradient(circle at 22% 82%, rgba(255, 255, 255, 0.08), transparent 54%);
+}
+
+.experiment-panel[data-card-style="mirror"]::before {
+  background:
+    linear-gradient(
+      110deg,
+      rgba(255, 255, 255, 0.2) 0%,
+      rgba(255, 255, 255, 0.03) 28%,
+      transparent 56%,
+      rgba(255, 255, 255, 0.12) 84%,
+      transparent 100%
+    ),
+    radial-gradient(
+      circle at 82% 22%,
+      color-mix(in srgb, var(--experiment-accent) 44%, transparent),
+      transparent 52%
+    ),
+    radial-gradient(circle at 24% 78%, rgba(255, 255, 255, 0.09), transparent 58%);
 }
 
 .experiment-panel[data-card-style="alma"]::before {

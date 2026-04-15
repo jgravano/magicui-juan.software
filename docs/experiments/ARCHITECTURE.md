@@ -45,6 +45,7 @@ Each experiment should follow the same top-level pattern:
 2. Create route file `src/app/<slug>/page.tsx`.
 3. If needed, create component under `src/components/experiments/<slug>/`.
 4. Place systems under `src/lib/<slug>/`.
+5. Reuse shared creative modules from `src/lib/creative/` before adding experiment-specific infra.
 
 Keep route files thin. Put logic into `lib` and a controller component.
 
@@ -114,3 +115,16 @@ This pipeline is intentional; preserve order unless there's a clear reason to al
 - Keep functions focused and composable.
 - Prefer explicit code over hidden abstraction.
 - If introducing a refactor, keep system boundaries visible.
+
+## 9) Shared Creative Systems (Post-Mirror)
+
+Reusable infrastructure for camera-native and future experiments lives in:
+
+- `src/lib/creative/core/`
+- `src/lib/creative/camera/`
+- `src/lib/creative/segmentation/`
+- `src/lib/creative/adapters/`
+- `src/lib/creative/particles/`
+- `src/lib/creative/renderers/`
+
+Experiments should compose those modules through a thin controller instead of coupling providers directly to rendering code.

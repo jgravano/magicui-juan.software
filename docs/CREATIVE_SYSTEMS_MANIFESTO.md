@@ -1,147 +1,71 @@
 # Creative Systems Manifesto
 
-juan.software is not just a portfolio.
+## Intent
 
-It is a body of work, a laboratory, and an evolving creative system.
+Build interactive pieces as evolving systems, not isolated demos.
+Each experiment should inherit from previous work while introducing one clear step forward.
 
-Each experiment is meant to stand on its own as a piece.
-But no experiment should exist in isolation.
-Every project should inherit something from the previous one:
-a behavior, a visual language, a technical primitive, a way of sensing, a way of responding.
+## Core Principles
 
-This repository is not only a place to ship outcomes.
-It is a place to discover reusable forms.
+1. Layered construction first.
+2. Lineage over reinvention.
+3. Reusable primitives, minimal abstraction.
+4. Explicit frame pipelines.
+5. Behavior quality before visual polish.
 
-## We build pieces first
+## Layered Construction
 
-The first responsibility is always the piece.
+All real-time experiences should be validated in this order:
 
-An experiment should feel alive, intentional, and emotionally true.
-It should not exist only to demonstrate technology.
-It should not become empty infrastructure.
-The work must still feel like work.
+1. input acquisition
+2. signal processing
+3. semantic interpretation
+4. simulation / adaptation
+5. rendering / composition
+6. stylization
 
-We do not begin by designing a generic library.
-We begin by making something real.
+No layer should hide unresolved problems from previous layers.
 
-## Reuse is not repetition
+## Lineage Between Experiments
 
-Reusing a system does not mean copying it mechanically.
+- New experiments must reuse or evolve at least one prior system.
+- Keep compatibility where practical.
+- Preserve conceptual continuity in docs and code structure.
 
-Reuse means:
-- extracting what proved meaningful
-- improving what proved fragile
-- transforming what proved limited
-- carrying forward a lineage
+## Reusable Creative Primitives
 
-A particle system should not be reused because it already exists.
-It should be reused because it still has something to say.
+Primitives should be extracted only when they have clear multi-experiment value:
 
-A camera pipeline should not be abstracted just to look clean.
-It should be abstracted because it unlocks the next experience.
+- timing / frame clock
+- camera providers
+- segmentation providers
+- adapters from perception to simulation targets
+- particle simulation core
+- renderer contracts
 
-## The system emerges from the work
+Avoid abstracting style-specific logic into shared modules too early.
 
-We do not force a framework too early.
+## Architecture Guardrails
 
-The architecture should emerge from repeated artistic needs:
-- sensing presence
-- translating motion
-- shaping matter
-- rendering response
-- controlling time
-- preserving interaction
+- Keep per-frame mutable state out of React state.
+- Keep controllers imperative and explicit.
+- Keep constants centralized and semantically named.
+- Keep debug tooling opt-in and out of product defaults.
 
-If a primitive appears once, it may be a trick.
-If it appears again and evolves, it may be a system.
-If it keeps proving useful across works, it deserves a name.
+## Quality Guardrails
 
-## Every experiment leaves something behind
+- Favor spatial correspondence and latency fidelity over decorative effects.
+- Remove autonomous motion that weakens body or input readability.
+- Add visual layers only when they improve meaning, not noise.
 
-Each project should contribute at least one of these:
-- a reusable visual primitive
-- a stronger interaction model
-- a cleaner architectural pattern
-- a refined aesthetic behavior
-- a clearer technical decision
-- a lesson worth preserving
+## Documentation Discipline
 
-An experiment is never only its final screen.
-It is also the method it leaves for the next one.
+Every significant direction change must record:
 
-## Build in layers
+- context
+- decision
+- tradeoff
+- expected reuse
+- known limits
 
-We value visible, testable construction.
-
-A good creative system can be understood as layers:
-1. input
-2. processing
-3. interpretation
-4. rendering
-5. stylization
-
-We do not hide weak foundations behind visual noise.
-We validate the truth of each layer before pushing aesthetics further.
-
-Beauty is stronger when the structure underneath is real.
-
-## Tools should carry taste
-
-This project is not interested in utilities without character.
-
-If reusable systems emerge from juan.software, they should carry not only function but taste:
-- responsiveness over gimmick
-- presence over spectacle
-- elegance over clutter
-- atmosphere over noise
-- intentionality over randomness
-
-The goal is not to build a neutral toolbox.
-The goal is to build expressive primitives.
-
-## Personal first, public later
-
-These systems are born from personal work.
-
-They do not need to become public packages immediately.
-They do not need premature APIs.
-They do not need abstraction for abstraction’s sake.
-
-First they must prove themselves here.
-
-If they become robust, meaningful, and transferable,
-they may eventually become:
-- internal modules
-- open-source packages
-- creative toolkits
-- educational artifacts
-- starting points for other developers
-
-But publication is not the origin.
-The work is.
-
-## A living lineage
-
-resonance is not discarded by mirror.
-mirror is not a replacement for resonance.
-Each experiment extends the lineage.
-
-The repository should tell that story:
-not a pile of disconnected projects,
-but an evolving language of interaction.
-
-What we are building is not only a website.
-
-We are building:
-- a body of work
-- a creative engine
-- a way of thinking in public
-- a system that becomes more itself with every experiment
-
-## Final principle
-
-Do not force the library.
-
-Let the work reveal the system.
-
-Let the system earn its form.
+Use `docs/decisions/*` and experiment READMEs as durable memory.
