@@ -70,6 +70,7 @@ The simulation is expressive by design, not physically strict.
 
 - `src/lib/resonance/utils.ts`
   - math helpers (`clamp`, `lerp`, `inverseLerp`, `randomBetween`)
+  - reexports from shared `src/lib/creative/math.ts` for cross-experiment reuse
 
 ## 3) Frame Execution Order
 

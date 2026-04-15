@@ -1,5 +1,5 @@
 export type ExperimentStatus = "live" | "wip" | "draft" | "archive";
-export type ExperimentCardStyle = "resonance" | "alma" | "umbral";
+export type ExperimentCardStyle = "resonance" | "mirror" | "alma" | "umbral";
 
 export type ExperimentEntry = {
   slug: string;
@@ -26,12 +26,22 @@ export const experimentsCatalog: ExperimentEntry[] = [
     cardStyle: "resonance",
   },
   {
+    slug: "mirror",
+    title: "Mirror",
+    teaser: "A persistent mirror that shifts between liquid chrome and human particles.",
+    status: "live",
+    tags: ["camera", "segmentation", "mirror"],
+    order: 20,
+    accent: "#c9d0de",
+    cardStyle: "mirror",
+  },
+  {
     slug: "alma",
     title: "Alma",
     teaser: "A memory chamber made of text, light leaks, and unstable timing.",
     status: "wip",
     tags: ["poetry-engine", "generative-type", "memory"],
-    order: 20,
+    order: 30,
     accent: "#ff9b6a",
     cardStyle: "alma",
   },
@@ -41,7 +51,7 @@ export const experimentsCatalog: ExperimentEntry[] = [
     teaser: "A brittle threshold where lines split, mirror, and dissolve.",
     status: "draft",
     tags: ["soon"],
-    order: 30,
+    order: 40,
     accent: "#8ee6d0",
     cardStyle: "umbral",
   },
