@@ -1,0 +1,180 @@
+[
+  {
+    "word": "ábaco",
+    "pos": "sustantivo",
+    "definition": "Instrumento de cálculo formado por varillas o hilos con cuentas móviles.",
+    "shortDefinition": "Instrumento de cálculo con cuentas móviles.",
+    "example": "La niña resolvió sumas en el ábaco de madera.",
+    "etymology": "Del latín abacus, y este del griego abax."
+  },
+  {
+    "word": "abisal",
+    "pos": "adjetivo",
+    "definition": "Perteneciente o relativo a zonas marinas de gran profundidad.",
+    "shortDefinition": "Relativo a grandes profundidades marinas.",
+    "example": "La fauna abisal vive en condiciones extremas."
+  },
+  {
+    "word": "acervo",
+    "pos": "sustantivo",
+    "definition": "Conjunto de bienes culturales, conocimientos o valores compartidos.",
+    "shortDefinition": "Conjunto de conocimientos o bienes culturales.",
+    "example": "La biblioteca resguarda el acervo histórico local."
+  },
+  {
+    "word": "afán",
+    "pos": "sustantivo",
+    "definition": "Empeño intenso y constante para conseguir un fin.",
+    "shortDefinition": "Esfuerzo intenso por lograr un objetivo.",
+    "example": "Trabajó con afán para terminar el proyecto."
+  },
+  {
+    "word": "albor",
+    "pos": "sustantivo",
+    "definition": "Claridad blanquecina que antecede a la salida del sol.",
+    "shortDefinition": "Primera luz del día.",
+    "example": "Partieron al albor para evitar el calor."
+  },
+  {
+    "word": "aljibe",
+    "pos": "sustantivo",
+    "definition": "Depósito, por lo general subterráneo, destinado a almacenar agua.",
+    "shortDefinition": "Depósito para guardar agua.",
+    "example": "El patio antiguo tenía un aljibe de piedra."
+  },
+  {
+    "word": "altivez",
+    "pos": "sustantivo",
+    "definition": "Orgullo o dignidad en la actitud y el porte.",
+    "shortDefinition": "Actitud orgullosa y digna.",
+    "example": "Respondió con altivez, sin perder la calma."
+  },
+  {
+    "word": "amparo",
+    "pos": "sustantivo",
+    "definition": "Protección o resguardo frente a una amenaza o riesgo.",
+    "shortDefinition": "Protección o resguardo.",
+    "example": "Buscó amparo bajo el techo durante la tormenta."
+  },
+  {
+    "word": "anáfora",
+    "pos": "sustantivo",
+    "definition": "Figura retórica que repite una o varias palabras al comienzo de frases sucesivas.",
+    "shortDefinition": "Repetición inicial de palabras en frases sucesivas.",
+    "example": "El poema usa anáfora para reforzar su ritmo.",
+    "etymology": "Del latín anaphora, y este del griego anaphorá."
+  },
+  {
+    "word": "andamiaje",
+    "pos": "sustantivo",
+    "definition": "Estructura provisional que sostiene personas y materiales en una obra.",
+    "shortDefinition": "Estructura temporal de apoyo en construcción.",
+    "example": "Los obreros subieron al andamiaje al amanecer."
+  },
+  {
+    "word": "anhelo",
+    "pos": "sustantivo",
+    "definition": "Deseo profundo y persistente de alcanzar algo.",
+    "shortDefinition": "Deseo profundo y persistente.",
+    "example": "Su mayor anhelo era vivir cerca del mar."
+  },
+  {
+    "word": "arcano",
+    "pos": "adjetivo",
+    "definition": "Muy secreto, oculto o de difícil comprensión.",
+    "shortDefinition": "Secreto o difícil de comprender.",
+    "example": "El manuscrito contenía símbolos arcanos."
+  },
+  {
+    "word": "argamasa",
+    "pos": "sustantivo",
+    "definition": "Mezcla de cal, arena y agua utilizada para unir materiales de obra.",
+    "shortDefinition": "Mezcla para unir materiales de construcción.",
+    "example": "La pared antigua aún conserva su argamasa original."
+  },
+  {
+    "word": "arista",
+    "pos": "sustantivo",
+    "definition": "Línea de intersección entre dos superficies o planos.",
+    "shortDefinition": "Línea donde se encuentran dos planos.",
+    "example": "Pulió la arista para evitar cortes."
+  },
+  {
+    "word": "atavío",
+    "pos": "sustantivo",
+    "definition": "Conjunto de prendas, adornos y accesorios para vestir.",
+    "shortDefinition": "Conjunto de prendas y adornos.",
+    "example": "El atavío ceremonial brillaba bajo las luces."
+  },
+  {
+    "word": "augurio",
+    "pos": "sustantivo",
+    "definition": "Señal o indicio que se interpreta como anuncio de un hecho futuro.",
+    "shortDefinition": "Señal que anuncia algo futuro.",
+    "example": "Tomó el silencio como mal augurio."
+  },
+  {
+    "word": "austero",
+    "pos": "adjetivo",
+    "definition": "Sobrio, simple y sin ornamentos innecesarios.",
+    "shortDefinition": "Sobrio y sin adornos superfluos.",
+    "example": "El estudio tenía un diseño austero y elegante.",
+    "etymology": "Del latín austerus, del griego austērós."
+  },
+  {
+    "word": "baluarte",
+    "pos": "sustantivo",
+    "definition": "Defensa firme de una causa, institución o valor.",
+    "shortDefinition": "Defensa firme de una causa.",
+    "example": "La profesora fue baluarte de la educación pública."
+  },
+  {
+    "word": "bruma",
+    "pos": "sustantivo",
+    "definition": "Niebla ligera que dificulta la visibilidad sin ocultar por completo.",
+    "shortDefinition": "Niebla ligera.",
+    "example": "La costa amaneció cubierta de bruma."
+  },
+  {
+    "word": "cadencia",
+    "pos": "sustantivo",
+    "definition": "Ritmo regular en la sucesión de sonidos, movimientos o palabras.",
+    "shortDefinition": "Ritmo regular y armonioso.",
+    "example": "La cadencia de su voz transmitía calma."
+  },
+  {
+    "word": "caligrafía",
+    "pos": "sustantivo",
+    "definition": "Arte y técnica de escribir con trazos bellos y proporcionados.",
+    "shortDefinition": "Arte de escribir con trazo bello.",
+    "example": "Practicó caligrafía durante horas."
+  },
+  {
+    "word": "cantera",
+    "pos": "sustantivo",
+    "definition": "Lugar de donde se extrae piedra o donde se forma talento nuevo.",
+    "shortDefinition": "Lugar de extracción de piedra o formación de talento.",
+    "example": "La escuela fue cantera de grandes músicos."
+  },
+  {
+    "word": "cendal",
+    "pos": "sustantivo",
+    "definition": "Tela delgada y transparente, de textura muy fina.",
+    "shortDefinition": "Tela muy fina y transparente.",
+    "example": "Un cendal cubría el marco del retrato."
+  },
+  {
+    "word": "ceñido",
+    "pos": "adjetivo",
+    "definition": "Ajustado estrechamente al cuerpo o a una forma determinada.",
+    "shortDefinition": "Ajustado al cuerpo o a una forma.",
+    "example": "Llevaba un abrigo ceñido a la cintura."
+  },
+  {
+    "word": "claroscuro",
+    "pos": "sustantivo",
+    "definition": "Contraste de luces y sombras que modela volúmenes en arte visual.",
+    "shortDefinition": "Contraste entre luces y sombras.",
+    "example": "La escena usa claroscuro para crear dramatismo."
+  }
+]

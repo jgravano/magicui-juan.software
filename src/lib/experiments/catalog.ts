@@ -1,5 +1,5 @@
 export type ExperimentStatus = "live" | "wip" | "draft" | "archive";
-export type ExperimentCardStyle = "resonance" | "mirror" | "alma" | "umbral";
+export type ExperimentCardStyle = "resonance" | "lupa" | "mirror" | "alma" | "umbral";
 
 export type ExperimentEntry = {
   slug: string;
@@ -24,6 +24,16 @@ export const experimentsCatalog: ExperimentEntry[] = [
     order: 10,
     accent: "#9ab4ff",
     cardStyle: "resonance",
+  },
+  {
+    slug: "lupa",
+    title: "Lupa",
+    teaser: "A dictionary paper field with a physical magnifying lens.",
+    status: "live",
+    tags: ["webgl2", "typography", "optics"],
+    order: 15,
+    accent: "#d7c5a2",
+    cardStyle: "lupa",
   },
   {
     slug: "mirror",
