@@ -1,0 +1,332 @@
+{
+  "source": {
+    "name": "Wikcionario (eswiktionary)",
+    "url": "https://es.wiktionary.org",
+    "dumpProvider": "https://dumps.wikimedia.org/eswiktionary/latest/",
+    "extractionTool": "https://github.com/tatuylonen/wiktextract",
+    "license": "CC BY-SA + GFDL (Wikcionario/Wikimedia)",
+    "attribution": "Contenido derivado de Wikcionario (Wikimedia)."
+  },
+  "generatedAt": "2026-04-16T00:54:05.127Z",
+  "rawLineCount": 1006011,
+  "totalEntries": 141337,
+  "shardSize": 1800,
+  "shards": [
+    {
+      "file": "eswiktionary-0000.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0001.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0002.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0003.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0004.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0005.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0006.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0007.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0008.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0009.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0010.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0011.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0012.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0013.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0014.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0015.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0016.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0017.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0018.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0019.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0020.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0021.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0022.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0023.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0024.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0025.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0026.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0027.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0028.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0029.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0030.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0031.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0032.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0033.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0034.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0035.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0036.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0037.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0038.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0039.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0040.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0041.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0042.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0043.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0044.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0045.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0046.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0047.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0048.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0049.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0050.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0051.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0052.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0053.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0054.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0055.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0056.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0057.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0058.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0059.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0060.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0061.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0062.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0063.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0064.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0065.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0066.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0067.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0068.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0069.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0070.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0071.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0072.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0073.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0074.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0075.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0076.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0077.json",
+      "entries": 1800
+    },
+    {
+      "file": "eswiktionary-0078.json",
+      "entries": 937
+    }
+  ]
+}

@@ -122,6 +122,67 @@ body {
   color: rgba(255, 217, 184, 0.9);
 }
 
+.lupa-page {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  cursor: none;
+  background: #e7e1d3;
+}
+
+.lupa-experience {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.lupa-paper {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  z-index: 0;
+}
+
+.lupa-lens {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.lupa-hint,
+.lupa-status {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 7px 10px;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  background: rgba(239, 231, 217, 0.86);
+  color: rgba(32, 25, 14, 0.85);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-family: "JetBrains Mono", "SFMono-Regular", ui-monospace, monospace;
+  user-select: none;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.lupa-hint {
+  bottom: clamp(16px, 3vw, 26px);
+}
+
+.lupa-status {
+  bottom: clamp(56px, 9vw, 82px);
+}
+
 .experiments-home {
   position: relative;
   height: 100vh;
@@ -224,6 +285,28 @@ body {
       transparent 44%
     ),
     radial-gradient(circle at 22% 82%, rgba(255, 255, 255, 0.08), transparent 54%);
+}
+
+.experiment-panel[data-card-style="lupa"]::before {
+  background:
+    radial-gradient(
+      circle at 78% 20%,
+      color-mix(in srgb, var(--experiment-accent) 44%, transparent),
+      transparent 52%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(243, 231, 210, 0.22) 0%,
+      rgba(88, 70, 40, 0.08) 42%,
+      transparent 100%
+    ),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 1px,
+      transparent 1px,
+      transparent 6px
+    );
 }
 
 .experiment-panel[data-card-style="mirror"]::before {
