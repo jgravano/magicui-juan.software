@@ -125,9 +125,12 @@ body {
 .lupa-page {
   position: relative;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+  min-height: 100vh;
   overflow: hidden;
-  cursor: none;
+  overscroll-behavior: none;
+  touch-action: none;
+  user-select: none;
   background: #e7e1d3;
 }
 
@@ -176,11 +179,17 @@ body {
 }
 
 .lupa-hint {
-  bottom: clamp(16px, 3vw, 26px);
+  bottom: calc(clamp(16px, 3vw, 26px) + env(safe-area-inset-bottom));
 }
 
 .lupa-status {
-  bottom: clamp(56px, 9vw, 82px);
+  bottom: calc(clamp(56px, 9vw, 82px) + env(safe-area-inset-bottom));
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .lupa-page {
+    cursor: none;
+  }
 }
 
 .experiments-home {

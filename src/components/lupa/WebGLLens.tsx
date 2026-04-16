@@ -359,6 +359,7 @@ export function WebGLLens(props: WebGLLensProps) {
     let uploadedCanvas: HTMLCanvasElement | null = null;
     let uploadedSignature = "";
     let isPointerInitialized = false;
+    let activeTouchPointerId: number | null = null;
     let previousTimestampMs = 0;
 
     const updateCanvasSize = () => {
@@ -398,10 +399,47 @@ export function WebGLLens(props: WebGLLensProps) {
       };
     };
 
-    const handlePointerMove = (event: PointerEvent) => {
+    const setTargetMouseFromPointer = (event: PointerEvent) => {
       const nextMouse = toBufferSpace(event.clientX, event.clientY);
       targetMouseRef.current.x = nextMouse.x;
       targetMouseRef.current.y = nextMouse.y;
+    };
+
+    const handlePointerDown = (event: PointerEvent) => {
+      if (event.pointerType === "touch") {
+        activeTouchPointerId = event.pointerId;
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+      }
+
+      setTargetMouseFromPointer(event);
+    };
+
+    const handlePointerMove = (event: PointerEvent) => {
+      if (event.pointerType === "touch") {
+        if (activeTouchPointerId === null || event.pointerId !== activeTouchPointerId) {
+          return;
+        }
+
+        if (event.cancelable) {
+          event.preventDefault();
+        }
+      }
+
+      setTargetMouseFromPointer(event);
+    };
+
+    const handlePointerUp = (event: PointerEvent) => {
+      if (event.pointerType === "touch" && event.pointerId === activeTouchPointerId) {
+        activeTouchPointerId = null;
+      }
+    };
+
+    const handlePointerCancel = (event: PointerEvent) => {
+      if (event.pointerType === "touch" && event.pointerId === activeTouchPointerId) {
+        activeTouchPointerId = null;
+      }
     };
 
     const uploadTextureIfNeeded = () => {
@@ -435,7 +473,10 @@ export function WebGLLens(props: WebGLLensProps) {
     window.addEventListener("orientationchange", updateCanvasSize);
     visualViewport?.addEventListener("resize", updateCanvasSize);
     visualViewport?.addEventListener("scroll", updateCanvasSize);
-    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerdown", handlePointerDown, { passive: false });
+    window.addEventListener("pointermove", handlePointerMove, { passive: false });
+    window.addEventListener("pointerup", handlePointerUp);
+    window.addEventListener("pointercancel", handlePointerCancel);
 
     let animationFrameId = 0;
 
@@ -478,7 +519,10 @@ export function WebGLLens(props: WebGLLensProps) {
       window.removeEventListener("orientationchange", updateCanvasSize);
       visualViewport?.removeEventListener("resize", updateCanvasSize);
       visualViewport?.removeEventListener("scroll", updateCanvasSize);
+      window.removeEventListener("pointerdown", handlePointerDown);
       window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerCancel);
       gl.deleteTexture(texture);
       gl.deleteBuffer(quadBuffer);
       gl.deleteVertexArray(vertexArray);
