@@ -19,6 +19,7 @@ export function LupaExperience() {
   const [entries, setEntries] = useState<DictionaryEntry[]>([]);
   const [paperCanvas, setPaperCanvas] = useState<HTMLCanvasElement | null>(null);
   const [showHint, setShowHint] = useState(true);
+  const [isCoarsePointer, setIsCoarsePointer] = useState(false);
   const [dictionaryError, setDictionaryError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -62,7 +63,37 @@ export function LupaExperience() {
     };
   }, []);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(pointer: coarse)");
+    const syncPointerMode = () => {
+      setIsCoarsePointer(mediaQuery.matches);
+    };
+
+    syncPointerMode();
+    if (typeof mediaQuery.addEventListener === "function") {
+      mediaQuery.addEventListener("change", syncPointerMode);
+    } else {
+      mediaQuery.addListener(syncPointerMode);
+    }
+
+    return () => {
+      if (typeof mediaQuery.removeEventListener === "function") {
+        mediaQuery.removeEventListener("change", syncPointerMode);
+      } else {
+        mediaQuery.removeListener(syncPointerMode);
+      }
+    };
+  }, []);
+
   const layout = useMemo(() => createDictionaryLayout(entries), [entries]);
+  const lensRadiusRatio = isCoarsePointer ? LUPA_LENS_RADIUS_RATIO * 1.04 : LUPA_LENS_RADIUS_RATIO;
+  const lensMinRadiusPx = isCoarsePointer
+    ? Math.round(LUPA_LENS_RADIUS_MIN_PX * 0.76)
+    : LUPA_LENS_RADIUS_MIN_PX;
+  const lensMaxRadiusPx = isCoarsePointer
+    ? Math.round(LUPA_LENS_RADIUS_MAX_PX * 0.84)
+    : LUPA_LENS_RADIUS_MAX_PX;
+  const hintText = isCoarsePointer ? "arrastra para enfocar" : "mueve el mouse para enfocar";
 
   const handlePaperCanvasReady = useCallback((canvas: HTMLCanvasElement | null) => {
     setPaperCanvas((previous) => (previous === canvas ? previous : canvas));
@@ -73,12 +104,12 @@ export function LupaExperience() {
       <DictionaryPaper layout={layout} onCanvasReady={handlePaperCanvasReady} />
       <WebGLLens
         sourceCanvas={paperCanvas}
-        radiusRatio={LUPA_LENS_RADIUS_RATIO}
-        minRadiusPx={LUPA_LENS_RADIUS_MIN_PX}
-        maxRadiusPx={LUPA_LENS_RADIUS_MAX_PX}
+        radiusRatio={lensRadiusRatio}
+        minRadiusPx={lensMinRadiusPx}
+        maxRadiusPx={lensMaxRadiusPx}
         zoom={LUPA_LENS_ZOOM}
       />
-      {showHint ? <p className="lupa-hint">mueve el mouse para enfocar</p> : null}
+      {showHint ? <p className="lupa-hint">{hintText}</p> : null}
       {dictionaryError ? <p className="lupa-status">{dictionaryError}</p> : null}
     </div>
   );
