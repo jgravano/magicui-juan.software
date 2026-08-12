@@ -1,5 +1,5 @@
 export type ExperimentStatus = "live" | "wip" | "draft" | "archive";
-export type ExperimentCardStyle = "resonance" | "lupa" | "mirror" | "alma" | "umbral";
+export type ExperimentCardStyle = "resonance" | "lupa" | "mirror" | "melt" | "alma" | "umbral";
 
 export type ExperimentEntry = {
   slug: string;
@@ -44,6 +44,16 @@ export const experimentsCatalog: ExperimentEntry[] = [
     order: 20,
     accent: "#c9d0de",
     cardStyle: "mirror",
+  },
+  {
+    slug: "melt",
+    title: "Melt",
+    teaser: "Teach the mirror your room, then disappear into it.",
+    status: "wip",
+    tags: ["camera", "segmentation", "background-memory"],
+    order: 25,
+    accent: "#d6cec4",
+    cardStyle: "melt",
   },
   {
     slug: "alma",
