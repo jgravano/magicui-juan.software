@@ -1,5 +1,5 @@
 export type ExperimentStatus = "live" | "wip" | "draft" | "archive";
-export type ExperimentCardStyle = "resonance" | "lupa" | "mirror" | "alma" | "umbral";
+export type ExperimentCardStyle = "resonance" | "lupa" | "mirror" | "other-side" | "alma" | "umbral";
 
 export type ExperimentEntry = {
   slug: string;
@@ -44,6 +44,16 @@ export const experimentsCatalog: ExperimentEntry[] = [
     order: 20,
     accent: "#c9d0de",
     cardStyle: "mirror",
+  },
+  {
+    slug: "other-side",
+    title: "The Other Side",
+    teaser: "Open a frame between your hands and meet your particle double on the other side.",
+    status: "live",
+    tags: ["camera", "hand-tracking", "segmentation", "webgl2"],
+    order: 25,
+    accent: "#9ab4ff",
+    cardStyle: "other-side",
   },
   {
     slug: "alma",

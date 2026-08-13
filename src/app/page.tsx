@@ -34,7 +34,7 @@ export default function HomePage() {
                 <span className="status-pill">{statusLabelMap[experiment.status]}</span>
               </div>
               <h1 className="experiment-panel__name">
-                {index + 1}. {experiment.slug}
+                {index + 1}. {experiment.title.toLowerCase()}
               </h1>
               <p className="experiment-panel__teaser">{experiment.teaser}</p>
               <p className="experiment-panel__tags">{experiment.tags.join(" · ")}</p>
