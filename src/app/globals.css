@@ -40,7 +40,7 @@ a:focus-visible {
 
 .experiments-home {
   min-height: 100svh;
-  padding: 0 clamp(18px, 3.5vw, 56px) 48px;
+  padding: 0 clamp(18px, 3.5vw, 56px);
   background: var(--paper);
 }
 
@@ -54,26 +54,47 @@ a:focus-visible {
 }
 
 .site-header h1,
-.site-header p {
+.site-header nav {
   margin: 0;
   font-size: 15px;
   font-weight: 500;
   line-height: 1;
 }
 
-.site-header p {
+.site-header nav {
+  display: flex;
+  gap: clamp(18px, 2.2vw, 34px);
+  align-items: center;
   color: var(--muted);
   font-weight: 400;
 }
 
+.site-header nav a {
+  padding: 4px 0;
+  border-bottom: 1px solid transparent;
+  color: var(--ink);
+  transition: border-color 160ms ease;
+}
+
+.site-header nav a:hover {
+  border-color: currentColor;
+}
+
 .experiments-index {
+  min-height: calc(100svh - 88px);
+  display: grid;
+  grid-auto-rows: minmax(150px, 1fr);
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .experiment-row {
-  min-height: clamp(160px, 22vh, 230px);
+  --row-background: var(--ink);
+  --row-color: #fff;
+  --row-muted: rgba(255, 255, 255, 0.66);
+  height: 100%;
+  min-height: 0;
   display: grid;
   grid-template-columns: 52px minmax(260px, 1fr) minmax(250px, 420px) 24px;
   gap: clamp(18px, 2.8vw, 46px);
@@ -82,6 +103,28 @@ a:focus-visible {
   padding: 28px 12px;
   border-bottom: 1px solid var(--rule);
   transition: background-color 180ms ease, color 180ms ease, padding 180ms ease;
+}
+
+.experiment-row[data-project="resonance"] {
+  --row-background: #dce4f4;
+  --row-color: #17191d;
+  --row-muted: #626975;
+}
+
+.experiment-row[data-project="lupa"] {
+  --row-background: #ded6c8;
+  --row-color: #1d1913;
+  --row-muted: #6e665a;
+}
+
+.experiment-row[data-project="mirror"] {
+  --row-background: #d6d7d6;
+  --row-color: #161716;
+  --row-muted: #666866;
+}
+
+.experiment-row[data-project="other-side"] {
+  --row-background: #171a22;
 }
 
 .experiment-number {
@@ -122,13 +165,13 @@ a:focus-visible {
   .experiment-row:hover {
     padding-right: 18px;
     padding-left: 18px;
-    color: #fff;
-    background: var(--ink);
+    color: var(--row-color);
+    background: var(--row-background);
   }
 
   .experiment-row:hover .experiment-number,
   .experiment-row:hover p {
-    color: rgba(255, 255, 255, 0.66);
+    color: var(--row-muted);
   }
 
   .experiment-row:hover .experiment-arrow {
@@ -393,8 +436,17 @@ a:focus-visible {
   }
 
   .site-header h1,
-  .site-header p {
+  .site-header nav {
     font-size: 14px;
+  }
+
+  .site-header nav {
+    gap: 16px;
+  }
+
+  .experiments-index {
+    min-height: auto;
+    display: block;
   }
 
   .experiment-row {
