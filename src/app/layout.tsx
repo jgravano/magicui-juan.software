@@ -4,8 +4,11 @@ import type { ReactNode } from "react";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Experiments · juan.software",
-  description: "Interactive experiments by juan.software",
+  title: {
+    default: "juan.software",
+    template: "%s — juan.software",
+  },
+  description: "A selection of interactive work.",
 };
 
 type RootLayoutProps = {

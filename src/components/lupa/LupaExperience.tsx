@@ -93,14 +93,14 @@ export function LupaExperience() {
   const lensMaxRadiusPx = isCoarsePointer
     ? Math.round(LUPA_LENS_RADIUS_MAX_PX * 0.84)
     : LUPA_LENS_RADIUS_MAX_PX;
-  const hintText = isCoarsePointer ? "arrastra para enfocar" : "mueve el mouse para enfocar";
+  const hintText = isCoarsePointer ? "Drag the lens to explore." : "Move the lens to explore.";
 
   const handlePaperCanvasReady = useCallback((canvas: HTMLCanvasElement | null) => {
     setPaperCanvas((previous) => (previous === canvas ? previous : canvas));
   }, []);
 
   return (
-    <div className="lupa-experience" aria-label="Lupa interactive experiment">
+    <div className="lupa-experience" aria-label="Interactive magnifying lens">
       <DictionaryPaper layout={layout} onCanvasReady={handlePaperCanvasReady} />
       <WebGLLens
         sourceCanvas={paperCanvas}

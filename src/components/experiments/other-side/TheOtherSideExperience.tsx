@@ -17,11 +17,11 @@ const initialUIState: OtherSideUIState = {
 };
 
 const getPrompt = (state: OtherSideUIState) => {
-  if (state.phase === "booting") return "CAMERA";
-  if (state.phase === "error") return "CAMERA UNAVAILABLE";
-  if (state.handsVisible === 0) return "TWO HANDS";
-  if (state.handsVisible === 1) return "ONE MORE HAND";
-  if (!state.frameActive) return "SPREAD YOUR HANDS";
+  if (state.phase === "booting") return "Starting the camera…";
+  if (state.phase === "error") return "The camera is unavailable.";
+  if (state.handsVisible === 0) return "Hold both hands in view.";
+  if (state.handsVisible === 1) return "Bring your other hand into view.";
+  if (!state.frameActive) return "Move your hands farther apart.";
   return "";
 };
 
