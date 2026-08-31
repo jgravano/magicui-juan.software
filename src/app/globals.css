@@ -313,10 +313,10 @@ a:focus-visible {
 
 .project--smiley {
   --base-rotate: 4deg;
-  left: 5%;
-  bottom: -2%;
+  left: 4%;
+  bottom: -3%;
   z-index: 4;
-  width: 18%;
+  width: 21%;
 }
 
 .project--smiley .project-tag {
