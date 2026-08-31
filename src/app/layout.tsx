@@ -8,7 +8,11 @@ export const metadata: Metadata = {
     default: "juan.software",
     template: "%s — juan.software",
   },
-  description: "A selection of interactive work.",
+  description: "Projects by Juan Gravano.",
+  icons: {
+    icon: [{ url: "/favicon.png", type: "image/png", sizes: "512x512" }],
+    shortcut: "/favicon.png",
+  },
 };
 
 type RootLayoutProps = {
