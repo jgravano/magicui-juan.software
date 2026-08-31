@@ -50,9 +50,13 @@ export function SmileyExperience() {
         detachInput = attachSmileyInput({
           canvas,
           getLayout: renderer.getLayout,
-          onPressStart: (point, pressure) => beginSmileyPress(interaction, point, pressure),
-          onPressMove: (point, pressure) => moveSmileyPress(interaction, point, pressure),
-          onPressEnd: () => endSmileyPress(interaction),
+          onPressStart: (slot, point, pressure) => (
+            beginSmileyPress(interaction, slot, point, pressure)
+          ),
+          onPressMove: (slot, point, pressure) => (
+            moveSmileyPress(interaction, slot, point, pressure)
+          ),
+          onPressEnd: (slot) => endSmileyPress(interaction, slot),
           onHover: (point) => setSmileyHover(interaction, point),
           onFirstPress: () => hintRef.current?.classList.add(styles.hintHidden),
         });
@@ -103,10 +107,10 @@ export function SmileyExperience() {
         ref={canvasRef}
         className={styles.canvas}
         tabIndex={0}
-        aria-label="A soft smiley sphere. Press and hold anywhere on its face to deform it."
+        aria-label="A soft smiley sphere. Press anywhere to deform it, or pinch it with two fingers."
         aria-describedby="smiley-hint smiley-status"
       />
-      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press me</p>
+      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press or pinch me</p>
       <p ref={statusRef} id="smiley-status" className={styles.status} aria-live="polite" />
     </div>
   );

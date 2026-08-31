@@ -13,7 +13,12 @@ import {
   WOBBLE_RELEASE_IMPULSE,
   WOBBLE_STIFFNESS,
 } from "@/lib/smiley/constants";
-import type { SmileyInteractionState, Vector2 } from "@/lib/smiley/types";
+import type {
+  SmileyInteractionState,
+  SmileyPressSlot,
+  SmileyPressState,
+  Vector2,
+} from "@/lib/smiley/types";
 
 const blend = (current: number, target: number, speed: number, deltaSeconds: number) => (
   current + (target - current) * (1 - Math.exp(-speed * deltaSeconds))
@@ -32,61 +37,74 @@ const clampPointToSphere = (point: Vector2): Vector2 => {
   };
 };
 
-export const createSmileyInteractionState = (): SmileyInteractionState => ({
+const createPressState = (): SmileyPressState => ({
   amount: 0,
   velocity: 0,
   contact: { x: 0, y: 0 },
   targetContact: { x: 0, y: 0 },
+  isPressed: false,
+  heldSeconds: 0,
+  pressureScale: 1,
+});
+
+export const createSmileyInteractionState = (): SmileyInteractionState => ({
+  presses: [createPressState(), createPressState()],
   hover: 0,
   hoverTarget: 0,
   hoverPoint: { x: 0, y: 0 },
   targetHoverPoint: { x: 0, y: 0 },
-  isPressed: false,
-  heldSeconds: 0,
-  pressureScale: 1,
   wobble: 0,
   wobbleVelocity: 0,
 });
 
 export const beginSmileyPress = (
   state: SmileyInteractionState,
+  slot: SmileyPressSlot,
   point: Vector2,
   pressureScale: number,
 ) => {
+  const press = state.presses[slot];
   const contact = clampPointToSphere(point);
 
-  state.isPressed = true;
-  state.heldSeconds = 0;
-  state.pressureScale = pressureScale;
-  state.velocity += 2.4 * pressureScale;
-  state.targetContact = contact;
+  press.isPressed = true;
+  press.heldSeconds = 0;
+  press.pressureScale = pressureScale;
+  press.velocity += 2.4 * pressureScale;
+  press.targetContact = contact;
   state.targetHoverPoint = contact;
   state.hoverTarget = 1;
 
-  if (Math.abs(state.amount) < 0.02) {
-    state.contact = contact;
+  if (Math.abs(press.amount) < 0.02) {
+    press.contact = contact;
   }
 };
 
 export const moveSmileyPress = (
   state: SmileyInteractionState,
+  slot: SmileyPressSlot,
   point: Vector2,
   pressureScale: number,
 ) => {
+  const press = state.presses[slot];
   const contact = clampPointToSphere(point);
-  state.targetContact = contact;
+  press.targetContact = contact;
   state.targetHoverPoint = contact;
-  state.pressureScale = pressureScale;
+  press.pressureScale = pressureScale;
 };
 
-export const endSmileyPress = (state: SmileyInteractionState) => {
-  if (!state.isPressed) {
+export const endSmileyPress = (
+  state: SmileyInteractionState,
+  slot: SmileyPressSlot,
+) => {
+  const press = state.presses[slot];
+
+  if (!press.isPressed) {
     return;
   }
 
-  state.isPressed = false;
-  state.heldSeconds = 0;
-  state.wobbleVelocity += Math.max(state.amount, 0.22) * WOBBLE_RELEASE_IMPULSE;
+  press.isPressed = false;
+  press.heldSeconds = 0;
+  state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE;
 };
 
 export const setSmileyHover = (
@@ -107,43 +125,46 @@ export const advanceSmileyInteraction = (
 ) => {
   const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
 
-  if (state.isPressed) {
-    state.heldSeconds += deltaSeconds;
-  }
+  state.presses.forEach((press) => {
+    if (press.isPressed) {
+      press.heldSeconds += deltaSeconds;
+    }
 
-  const holdProgress = Math.min(state.heldSeconds / HOLD_PRESS_DURATION_SECONDS, 1);
-  const targetAmount = state.isPressed
-    ? (INITIAL_PRESS_STRENGTH + holdProgress * HOLD_PRESS_GAIN) * state.pressureScale
-    : 0;
-  const stiffness = state.isPressed ? PRESS_STIFFNESS : RELEASE_STIFFNESS;
-  const damping = reduceMotion
-    ? RELEASE_DAMPING * 3
-    : state.isPressed
-      ? PRESS_DAMPING
-      : RELEASE_DAMPING;
+    const holdProgress = Math.min(press.heldSeconds / HOLD_PRESS_DURATION_SECONDS, 1);
+    const targetAmount = press.isPressed
+      ? (INITIAL_PRESS_STRENGTH + holdProgress * HOLD_PRESS_GAIN) * press.pressureScale
+      : 0;
+    const stiffness = press.isPressed ? PRESS_STIFFNESS : RELEASE_STIFFNESS;
+    const damping = reduceMotion
+      ? RELEASE_DAMPING * 3
+      : press.isPressed
+        ? PRESS_DAMPING
+        : RELEASE_DAMPING;
 
-  state.velocity += (targetAmount - state.amount) * stiffness * deltaSeconds;
-  state.velocity *= Math.exp(-damping * deltaSeconds);
-  state.amount += state.velocity * deltaSeconds;
-  state.amount = Math.max(-0.3, Math.min(1.08, state.amount));
+    press.velocity += (targetAmount - press.amount) * stiffness * deltaSeconds;
+    press.velocity *= Math.exp(-damping * deltaSeconds);
+    press.amount += press.velocity * deltaSeconds;
+    press.amount = Math.max(-0.3, Math.min(1.08, press.amount));
 
-  if (!state.isPressed && Math.abs(state.amount) < 0.0005 && Math.abs(state.velocity) < 0.002) {
-    state.amount = 0;
-    state.velocity = 0;
-  }
+    if (!press.isPressed && Math.abs(press.amount) < 0.0005 && Math.abs(press.velocity) < 0.002) {
+      press.amount = 0;
+      press.velocity = 0;
+    }
 
-  state.contact.x = blend(
-    state.contact.x,
-    state.targetContact.x,
-    CONTACT_FOLLOW_SPEED,
-    deltaSeconds,
-  );
-  state.contact.y = blend(
-    state.contact.y,
-    state.targetContact.y,
-    CONTACT_FOLLOW_SPEED,
-    deltaSeconds,
-  );
+    press.contact.x = blend(
+      press.contact.x,
+      press.targetContact.x,
+      CONTACT_FOLLOW_SPEED,
+      deltaSeconds,
+    );
+    press.contact.y = blend(
+      press.contact.y,
+      press.targetContact.y,
+      CONTACT_FOLLOW_SPEED,
+      deltaSeconds,
+    );
+  });
+
   state.hover = blend(state.hover, state.hoverTarget, HOVER_FOLLOW_SPEED, deltaSeconds);
   state.hoverPoint.x = blend(
     state.hoverPoint.x,

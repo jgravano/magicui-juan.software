@@ -197,8 +197,12 @@ export const createSmileyRenderer = async (
     objectTexture: getUniform(gl, objectProgram, "uObjectTexture"),
     objectCenter: getUniform(gl, objectProgram, "uObjectCenter"),
     objectScale: getUniform(gl, objectProgram, "uObjectScale"),
-    pressPoint: getUniform(gl, objectProgram, "uPressPoint"),
-    pressAmount: getUniform(gl, objectProgram, "uPressAmount"),
+    pressPointA: getUniform(gl, objectProgram, "uPressPointA"),
+    pressPointB: getUniform(gl, objectProgram, "uPressPointB"),
+    pressAmountA: getUniform(gl, objectProgram, "uPressAmountA"),
+    pressAmountB: getUniform(gl, objectProgram, "uPressAmountB"),
+    pinchAmount: getUniform(gl, objectProgram, "uPinchAmount"),
+    pinchAxis: getUniform(gl, objectProgram, "uPinchAxis"),
     hoverPoint: getUniform(gl, objectProgram, "uHoverPoint"),
     hoverAmount: getUniform(gl, objectProgram, "uHoverAmount"),
     wobble: getUniform(gl, objectProgram, "uWobble"),
@@ -231,6 +235,21 @@ export const createSmileyRenderer = async (
     interaction: SmileyInteractionState,
     reduceMotion: boolean,
   ) => {
+    const [primaryPress, secondaryPress] = interaction.presses;
+    const pinchDeltaX = secondaryPress.contact.x - primaryPress.contact.x;
+    const pinchDeltaY = secondaryPress.contact.y - primaryPress.contact.y;
+    const pinchDistance = Math.hypot(pinchDeltaX, pinchDeltaY);
+    const pinchPresence = Math.max(0, Math.min(1, (pinchDistance - 0.16) / 0.34));
+    const pinchAmount = Math.min(
+      Math.max(primaryPress.amount, 0),
+      Math.max(secondaryPress.amount, 0),
+    ) * pinchPresence;
+    const pinchAxisX = pinchDistance > 0.001 ? pinchDeltaX / pinchDistance : 1;
+    const pinchAxisY = pinchDistance > 0.001 ? pinchDeltaY / pinchDistance : 0;
+    const aggregatePressAmount = Math.min(
+      Math.max(primaryPress.amount, secondaryPress.amount, 0) + pinchAmount * 0.28,
+      1.32,
+    );
     const objectCenterClipX = (layout.centerX / layout.viewportWidth) * 2 - 1;
     const objectCenterClipY = 1 - (layout.centerY / layout.viewportHeight) * 2;
     const objectScaleClipX = (layout.radiusPixels / layout.viewportWidth) * 2;
@@ -248,7 +267,7 @@ export const createSmileyRenderer = async (
     gl.uniform1f(backgroundUniforms.aspect, layout.viewportWidth / layout.viewportHeight);
     gl.uniform2f(backgroundUniforms.objectCenter, objectCenterUvX, objectCenterUvY);
     gl.uniform2f(backgroundUniforms.objectRadius, objectRadiusUvX, objectRadiusUvY);
-    gl.uniform1f(backgroundUniforms.pressAmount, interaction.amount);
+    gl.uniform1f(backgroundUniforms.pressAmount, aggregatePressAmount);
     gl.uniform1f(backgroundUniforms.wobble, interaction.wobble);
     gl.bindVertexArray(backgroundVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -261,8 +280,20 @@ export const createSmileyRenderer = async (
     gl.uniform1i(objectUniforms.objectTexture, 0);
     gl.uniform2f(objectUniforms.objectCenter, objectCenterClipX, objectCenterClipY);
     gl.uniform2f(objectUniforms.objectScale, objectScaleClipX, objectScaleClipY);
-    gl.uniform2f(objectUniforms.pressPoint, interaction.contact.x, interaction.contact.y);
-    gl.uniform1f(objectUniforms.pressAmount, interaction.amount);
+    gl.uniform2f(
+      objectUniforms.pressPointA,
+      primaryPress.contact.x,
+      primaryPress.contact.y,
+    );
+    gl.uniform2f(
+      objectUniforms.pressPointB,
+      secondaryPress.contact.x,
+      secondaryPress.contact.y,
+    );
+    gl.uniform1f(objectUniforms.pressAmountA, primaryPress.amount);
+    gl.uniform1f(objectUniforms.pressAmountB, secondaryPress.amount);
+    gl.uniform1f(objectUniforms.pinchAmount, pinchAmount);
+    gl.uniform2f(objectUniforms.pinchAxis, pinchAxisX, pinchAxisY);
     gl.uniform2f(
       objectUniforms.hoverPoint,
       interaction.hoverPoint.x,

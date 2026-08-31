@@ -66,8 +66,12 @@ layout(location = 1) in vec2 aTextureUv;
 
 uniform vec2 uObjectCenter;
 uniform vec2 uObjectScale;
-uniform vec2 uPressPoint;
-uniform float uPressAmount;
+uniform vec2 uPressPointA;
+uniform vec2 uPressPointB;
+uniform float uPressAmountA;
+uniform float uPressAmountB;
+uniform float uPinchAmount;
+uniform vec2 uPinchAxis;
 uniform float uWobble;
 uniform float uReduceMotion;
 uniform float uTime;
@@ -75,27 +79,38 @@ uniform float uTime;
 out vec2 vLocalPosition;
 out vec2 vTextureUv;
 
-void main() {
-  vec2 position = aPosition;
-  vec2 pressDelta = position - uPressPoint;
+void applyPress(inout vec2 position, vec2 pressPoint, float pressAmount) {
+  vec2 pressDelta = position - pressPoint;
   float pressDistance = length(pressDelta);
   float core = exp(-pow(pressDistance / 0.39, 2.0) * 1.7);
   float ring = exp(-pow((pressDistance - 0.40) / 0.20, 2.0) * 1.8);
-  float pointDistanceFromCenter = length(uPressPoint);
+  float pointDistanceFromCenter = length(pressPoint);
   vec2 directionTowardCenter = pointDistanceFromCenter > 0.08
-    ? -uPressPoint / pointDistanceFromCenter
+    ? -pressPoint / pointDistanceFromCenter
     : vec2(0.0);
   vec2 radialDirection = pressDistance > 0.001
     ? pressDelta / pressDistance
     : vec2(0.0);
 
   float edgeInfluence = smoothstep(0.12, 0.82, pointDistanceFromCenter);
-  position += directionTowardCenter * uPressAmount * 0.25 * core * edgeInfluence;
-  position -= radialDirection * uPressAmount * 0.066 * ring;
+  position += directionTowardCenter * pressAmount * 0.25 * core * edgeInfluence;
+  position -= radialDirection * pressAmount * 0.066 * ring;
+}
 
-  float compression = max(uPressAmount, 0.0);
+void main() {
+  vec2 position = aPosition;
+  applyPress(position, uPressPointA, uPressAmountA);
+  applyPress(position, uPressPointB, uPressAmountB);
+
+  float compression = max(max(uPressAmountA, uPressAmountB) - uPinchAmount * 0.62, 0.0);
   position.x *= 1.0 + compression * 0.064;
   position.y *= 1.0 - compression * 0.048;
+
+  vec2 pinchAxis = normalize(uPinchAxis);
+  vec2 pinchPerpendicular = vec2(-pinchAxis.y, pinchAxis.x);
+  float alongPinch = dot(position, pinchAxis) * (1.0 - uPinchAmount * 0.13);
+  float acrossPinch = dot(position, pinchPerpendicular) * (1.0 + uPinchAmount * 0.095);
+  position = pinchAxis * alongPinch + pinchPerpendicular * acrossPinch;
 
   float wobble = mix(uWobble, 0.0, uReduceMotion);
   position.x += wobble * 0.064 * sin((position.y + 1.0) * 2.25);
@@ -117,12 +132,36 @@ in vec2 vLocalPosition;
 in vec2 vTextureUv;
 
 uniform sampler2D uObjectTexture;
-uniform vec2 uPressPoint;
+uniform vec2 uPressPointA;
+uniform vec2 uPressPointB;
 uniform vec2 uHoverPoint;
-uniform float uPressAmount;
+uniform float uPressAmountA;
+uniform float uPressAmountB;
 uniform float uHoverAmount;
 
 out vec4 outColor;
+
+float pressureShade(vec2 localPosition, vec2 pressPoint, float pressAmount) {
+  vec2 pressDelta = localPosition - pressPoint;
+  float pressDistance = length(pressDelta);
+  float core = exp(-pow(pressDistance / 0.37, 2.0) * 1.85);
+  float ring = exp(-pow((pressDistance - 0.39) / 0.16, 2.0) * 1.65);
+  vec2 gradient = pressDelta / max(pressDistance, 0.025);
+  vec2 lightDirection = normalize(vec2(-0.72, 0.69));
+  float directionalShade = -dot(gradient, lightDirection) * ring * pressAmount * 0.18;
+  float cavityShade = -core * max(pressAmount, 0.0) * 0.13;
+  return directionalShade + cavityShade;
+}
+
+float pressureGlow(vec2 localPosition, vec2 pressPoint, float pressAmount) {
+  vec2 pressDelta = localPosition - pressPoint;
+  float pressDistance = length(pressDelta);
+  float core = exp(-pow(pressDistance / 0.37, 2.0) * 1.85);
+  float ring = exp(-pow((pressDistance - 0.39) / 0.16, 2.0) * 1.65);
+  float softRim = ring * max(pressAmount, 0.0) * 0.018;
+  float reboundLight = core * max(-pressAmount, 0.0) * 0.085;
+  return softRim + reboundLight;
+}
 
 void main() {
   vec4 source = texture(uObjectTexture, vTextureUv);
@@ -131,26 +170,18 @@ void main() {
   float baseMask = smoothstep(-0.995, -0.958, vLocalPosition.y);
   float alpha = roundMask * baseMask;
 
-  vec2 pressDelta = vLocalPosition - uPressPoint;
-  float pressDistance = length(pressDelta);
-  float core = exp(-pow(pressDistance / 0.37, 2.0) * 1.85);
-  float ring = exp(-pow((pressDistance - 0.39) / 0.16, 2.0) * 1.65);
-  vec2 gradient = pressDelta / max(pressDistance, 0.025);
-  vec2 lightDirection = normalize(vec2(-0.72, 0.69));
-  float signedPressure = uPressAmount;
-  float directionalShade = -dot(gradient, lightDirection) * ring * signedPressure * 0.18;
-  float cavityShade = -core * max(signedPressure, 0.0) * 0.13;
-  float reboundLight = core * max(-signedPressure, 0.0) * 0.085;
-
   vec2 hoverDelta = vLocalPosition - uHoverPoint;
   float hoverSheen = exp(-dot(hoverDelta, hoverDelta) / 0.085)
     * uHoverAmount * 0.018;
 
   vec3 color = source.rgb;
-  float softRim = ring * max(signedPressure, 0.0) * 0.018;
-  color *= 1.0 + directionalShade + cavityShade;
-  color += vec3(1.0, 0.73, 0.24) * softRim;
-  color += vec3(1.0, 0.72, 0.23) * (reboundLight + hoverSheen);
+  float shade = pressureShade(vLocalPosition, uPressPointA, uPressAmountA)
+    + pressureShade(vLocalPosition, uPressPointB, uPressAmountB);
+  float glow = pressureGlow(vLocalPosition, uPressPointA, uPressAmountA)
+    + pressureGlow(vLocalPosition, uPressPointB, uPressAmountB);
+  color *= 1.0 + shade;
+  color += vec3(1.0, 0.73, 0.24) * glow;
+  color += vec3(1.0, 0.72, 0.23) * hoverSheen;
 
   outColor = vec4(color, alpha);
 }

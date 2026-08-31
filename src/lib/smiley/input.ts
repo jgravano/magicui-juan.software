@@ -2,16 +2,25 @@ import {
   MAX_PRESSURE_SCALE,
   MIN_PRESSURE_SCALE,
 } from "@/lib/smiley/constants";
-import type { SmileyLayout, Vector2 } from "@/lib/smiley/types";
+import type {
+  SmileyLayout,
+  SmileyPressSlot,
+  Vector2,
+} from "@/lib/smiley/types";
 
 type SmileyInputOptions = {
   canvas: HTMLCanvasElement;
   getLayout: () => SmileyLayout;
   onFirstPress: () => void;
   onHover: (point: Vector2 | null) => void;
-  onPressEnd: () => void;
-  onPressMove: (point: Vector2, pressureScale: number) => void;
-  onPressStart: (point: Vector2, pressureScale: number) => void;
+  onPressEnd: (slot: SmileyPressSlot) => void;
+  onPressMove: (slot: SmileyPressSlot, point: Vector2, pressureScale: number) => void;
+  onPressStart: (slot: SmileyPressSlot, point: Vector2, pressureScale: number) => void;
+};
+
+type ActivePointer = {
+  point: Vector2;
+  slot: SmileyPressSlot;
 };
 
 const pointFromPointer = (
@@ -52,30 +61,53 @@ export const attachSmileyInput = ({
   onPressMove,
   onPressStart,
 }: SmileyInputOptions) => {
-  let activePointerId: number | null = null;
+  const activePointers = new Map<number, ActivePointer>();
   let hasPressed = false;
   let keyboardPressed = false;
+
+  const getAvailableSlot = (): SmileyPressSlot | null => {
+    let primaryIsUsed = keyboardPressed;
+    let secondaryIsUsed = false;
+
+    activePointers.forEach(({ slot }) => {
+      primaryIsUsed ||= slot === 0;
+      secondaryIsUsed ||= slot === 1;
+    });
+
+    if (!primaryIsUsed) {
+      return 0;
+    }
+
+    return secondaryIsUsed ? null : 1;
+  };
 
   const setCursor = (inside: boolean, pressing = false) => {
     canvas.style.cursor = pressing ? "grabbing" : inside ? "grab" : "default";
   };
 
   const handlePointerDown = (event: PointerEvent) => {
-    if (activePointerId !== null) {
+    if (activePointers.has(event.pointerId)) {
       return;
     }
 
     const point = pointFromPointer(canvas, getLayout(), event.clientX, event.clientY);
+    const slot = getAvailableSlot();
 
-    if (!isInsideSphere(point)) {
+    if (!isInsideSphere(point) || slot === null) {
       return;
     }
 
     event.preventDefault();
-    activePointerId = event.pointerId;
-    canvas.setPointerCapture(event.pointerId);
+    activePointers.set(event.pointerId, { point, slot });
+
+    try {
+      canvas.setPointerCapture(event.pointerId);
+    } catch {
+      // Pointer capture is an enhancement; the contact still works without it.
+    }
+
     setCursor(true, true);
-    onPressStart(point, pressureScaleFromPointer(event));
+    onPressStart(slot, point, pressureScaleFromPointer(event));
 
     if (!hasPressed) {
       hasPressed = true;
@@ -86,10 +118,12 @@ export const attachSmileyInput = ({
   const handlePointerMove = (event: PointerEvent) => {
     const point = pointFromPointer(canvas, getLayout(), event.clientX, event.clientY);
     const inside = isInsideSphere(point);
+    const activePointer = activePointers.get(event.pointerId);
 
-    if (event.pointerId === activePointerId) {
+    if (activePointer) {
       event.preventDefault();
-      onPressMove(point, pressureScaleFromPointer(event));
+      activePointer.point = point;
+      onPressMove(activePointer.slot, point, pressureScaleFromPointer(event));
       onHover(point);
       setCursor(inside, true);
       return;
@@ -102,27 +136,36 @@ export const attachSmileyInput = ({
   };
 
   const finishPointer = (event: PointerEvent) => {
-    if (event.pointerId !== activePointerId) {
+    const activePointer = activePointers.get(event.pointerId);
+
+    if (!activePointer) {
       return;
     }
 
     const point = pointFromPointer(canvas, getLayout(), event.clientX, event.clientY);
     const inside = isInsideSphere(point);
-    activePointerId = null;
-    onPressEnd();
-    onHover(inside ? point : null);
-    setCursor(inside);
+    activePointers.delete(event.pointerId);
+    onPressEnd(activePointer.slot);
+
+    const remainingPointer = activePointers.values().next().value as ActivePointer | undefined;
+    onHover(remainingPointer?.point ?? (inside ? point : null));
+    setCursor(Boolean(remainingPointer) || inside, Boolean(remainingPointer));
   };
 
   const handlePointerLeave = () => {
-    if (activePointerId === null) {
+    if (activePointers.size === 0) {
       onHover(null);
       setCursor(false);
     }
   };
 
   const handleKeyDown = (event: KeyboardEvent) => {
-    if ((event.key !== " " && event.key !== "Enter") || event.repeat || keyboardPressed) {
+    if (
+      (event.key !== " " && event.key !== "Enter")
+      || event.repeat
+      || keyboardPressed
+      || activePointers.size > 0
+    ) {
       return;
     }
 
@@ -130,7 +173,7 @@ export const attachSmileyInput = ({
     keyboardPressed = true;
     const point = { x: 0, y: 0 };
     onHover(point);
-    onPressStart(point, 1);
+    onPressStart(0, point, 1);
     setCursor(true, true);
 
     if (!hasPressed) {
@@ -146,14 +189,14 @@ export const attachSmileyInput = ({
 
     event.preventDefault();
     keyboardPressed = false;
-    onPressEnd();
+    onPressEnd(0);
     setCursor(true);
   };
 
   const handleBlur = () => {
     if (keyboardPressed) {
       keyboardPressed = false;
-      onPressEnd();
+      onPressEnd(0);
     }
   };
 

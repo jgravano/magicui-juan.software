@@ -11,18 +11,24 @@ export type SmileyLayout = {
   viewportHeight: number;
 };
 
-export type SmileyInteractionState = {
+export type SmileyPressSlot = 0 | 1;
+
+export type SmileyPressState = {
   amount: number;
   velocity: number;
   contact: Vector2;
   targetContact: Vector2;
+  isPressed: boolean;
+  heldSeconds: number;
+  pressureScale: number;
+};
+
+export type SmileyInteractionState = {
+  presses: [SmileyPressState, SmileyPressState];
   hover: number;
   hoverTarget: number;
   hoverPoint: Vector2;
   targetHoverPoint: Vector2;
-  isPressed: boolean;
-  heldSeconds: number;
-  pressureScale: number;
   wobble: number;
   wobbleVelocity: number;
 };
