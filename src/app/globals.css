@@ -107,7 +107,8 @@ a:focus-visible {
   --stage-x: 50%;
   --stage-y: 45%;
   position: relative;
-  min-height: calc(100svh - 106px);
+  container-type: size;
+  height: calc(100svh - 106px);
   margin-top: 5px;
   border-top: 1px solid var(--rule);
   border-bottom: 1px solid var(--rule);
@@ -121,10 +122,11 @@ a:focus-visible {
 .composition {
   position: absolute;
   top: 50%;
-  left: 0;
+  left: 50%;
   width: 100%;
+  width: min(100cqw, 160cqh);
   aspect-ratio: 16 / 9;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
 }
 
 .project {
@@ -313,10 +315,10 @@ a:focus-visible {
 
 .project--smiley {
   --base-rotate: 4deg;
-  left: 4%;
-  bottom: -3%;
+  left: 5%;
+  bottom: -2%;
   z-index: 4;
-  width: 21%;
+  width: 18%;
 }
 
 .project--smiley .project-tag {
@@ -623,7 +625,7 @@ a:focus-visible {
   }
 
   .object-stage {
-    min-height: calc(100svh - 129px);
+    height: calc(100svh - 129px);
   }
 }
 
