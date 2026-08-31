@@ -30,4 +30,10 @@ export const experimentsCatalog: ExperimentEntry[] = [
     description: "Hand tracking opens a frame to a particle self-portrait.",
     order: 25,
   },
+  {
+    slug: "smiley",
+    title: "Smiley",
+    description: "A soft object for the browser.",
+    order: 30,
+  },
 ];
