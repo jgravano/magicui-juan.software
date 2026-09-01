@@ -102,14 +102,18 @@ void main() {
   applyPress(position, uPressPointA, uPressAmountA);
   applyPress(position, uPressPointB, uPressAmountB);
 
-  float compression = max(max(uPressAmountA, uPressAmountB) - uPinchAmount * 0.62, 0.0);
+  float pinchSqueeze = max(uPinchAmount, 0.0);
+  float pinchStretch = max(-uPinchAmount, 0.0);
+  float compression = max(max(uPressAmountA, uPressAmountB) - pinchSqueeze * 0.62, 0.0);
   position.x *= 1.0 + compression * 0.064;
   position.y *= 1.0 - compression * 0.048;
 
   vec2 pinchAxis = normalize(uPinchAxis);
   vec2 pinchPerpendicular = vec2(-pinchAxis.y, pinchAxis.x);
-  float alongPinch = dot(position, pinchAxis) * (1.0 - uPinchAmount * 0.13);
-  float acrossPinch = dot(position, pinchPerpendicular) * (1.0 + uPinchAmount * 0.095);
+  float alongScale = 1.0 - pinchSqueeze * 0.21 + pinchStretch * 0.30;
+  float acrossScale = 1.0 + pinchSqueeze * 0.15 - pinchStretch * 0.12;
+  float alongPinch = dot(position, pinchAxis) * alongScale;
+  float acrossPinch = dot(position, pinchPerpendicular) * acrossScale;
   position = pinchAxis * alongPinch + pinchPerpendicular * acrossPinch;
 
   float wobble = mix(uWobble, 0.0, uReduceMotion);

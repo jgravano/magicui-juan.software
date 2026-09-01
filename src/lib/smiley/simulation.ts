@@ -5,6 +5,15 @@ import {
   HOVER_FOLLOW_SPEED,
   INITIAL_PRESS_STRENGTH,
   MAX_FRAME_DELTA_SECONDS,
+  PINCH_MAX_SQUEEZE,
+  PINCH_MAX_STRETCH,
+  PINCH_PRESS_DAMPING,
+  PINCH_PRESS_STIFFNESS,
+  PINCH_RELEASE_DAMPING,
+  PINCH_RELEASE_STIFFNESS,
+  PINCH_RELEASE_WOBBLE_IMPULSE,
+  PINCH_TRAVEL_FOR_FULL_STRETCH,
+  PINCH_TRAVEL_FOR_FULL_SQUEEZE,
   PRESS_DAMPING,
   PRESS_STIFFNESS,
   RELEASE_DAMPING,
@@ -47,8 +56,48 @@ const createPressState = (): SmileyPressState => ({
   pressureScale: 1,
 });
 
+const distanceBetweenPresses = (state: SmileyInteractionState) => {
+  const [primaryPress, secondaryPress] = state.presses;
+
+  return Math.hypot(
+    secondaryPress.targetContact.x - primaryPress.targetContact.x,
+    secondaryPress.targetContact.y - primaryPress.targetContact.y,
+  );
+};
+
+const updatePinchTarget = (state: SmileyInteractionState) => {
+  const [primaryPress, secondaryPress] = state.presses;
+
+  if (!primaryPress.isPressed || !secondaryPress.isPressed) {
+    state.pinch.active = false;
+    state.pinch.targetAmount = 0;
+    return;
+  }
+
+  const currentDistance = distanceBetweenPresses(state);
+
+  if (!state.pinch.active) {
+    state.pinch.active = true;
+    state.pinch.startDistance = currentDistance;
+    state.pinch.targetAmount = 0;
+    return;
+  }
+
+  const distanceDelta = state.pinch.startDistance - currentDistance;
+  state.pinch.targetAmount = distanceDelta >= 0
+    ? Math.min(distanceDelta / PINCH_TRAVEL_FOR_FULL_SQUEEZE, PINCH_MAX_SQUEEZE)
+    : Math.max(distanceDelta / PINCH_TRAVEL_FOR_FULL_STRETCH, -PINCH_MAX_STRETCH);
+};
+
 export const createSmileyInteractionState = (): SmileyInteractionState => ({
   presses: [createPressState(), createPressState()],
+  pinch: {
+    active: false,
+    amount: 0,
+    startDistance: 0,
+    targetAmount: 0,
+    velocity: 0,
+  },
   hover: 0,
   hoverTarget: 0,
   hoverPoint: { x: 0, y: 0 },
@@ -77,6 +126,8 @@ export const beginSmileyPress = (
   if (Math.abs(press.amount) < 0.02) {
     press.contact = contact;
   }
+
+  updatePinchTarget(state);
 };
 
 export const moveSmileyPress = (
@@ -90,6 +141,7 @@ export const moveSmileyPress = (
   press.targetContact = contact;
   state.targetHoverPoint = contact;
   press.pressureScale = pressureScale;
+  updatePinchTarget(state);
 };
 
 export const endSmileyPress = (
@@ -102,9 +154,12 @@ export const endSmileyPress = (
     return;
   }
 
+  const pinchReleaseAmount = state.pinch.active ? Math.abs(state.pinch.amount) : 0;
   press.isPressed = false;
   press.heldSeconds = 0;
-  state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE;
+  updatePinchTarget(state);
+  state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE
+    + pinchReleaseAmount * PINCH_RELEASE_WOBBLE_IMPULSE;
 };
 
 export const setSmileyHover = (
@@ -164,6 +219,35 @@ export const advanceSmileyInteraction = (
       deltaSeconds,
     );
   });
+
+  const pinchIsDriven = state.pinch.active;
+  const pinchStiffness = pinchIsDriven
+    ? PINCH_PRESS_STIFFNESS
+    : PINCH_RELEASE_STIFFNESS;
+  const pinchDamping = reduceMotion
+    ? PINCH_RELEASE_DAMPING * 3
+    : pinchIsDriven
+      ? PINCH_PRESS_DAMPING
+      : PINCH_RELEASE_DAMPING;
+
+  state.pinch.velocity += (
+    state.pinch.targetAmount - state.pinch.amount
+  ) * pinchStiffness * deltaSeconds;
+  state.pinch.velocity *= Math.exp(-pinchDamping * deltaSeconds);
+  state.pinch.amount += state.pinch.velocity * deltaSeconds;
+  state.pinch.amount = Math.max(
+    -PINCH_MAX_STRETCH * 1.04,
+    Math.min(PINCH_MAX_SQUEEZE * 1.04, state.pinch.amount),
+  );
+
+  if (
+    !state.pinch.active
+    && Math.abs(state.pinch.amount) < 0.0005
+    && Math.abs(state.pinch.velocity) < 0.002
+  ) {
+    state.pinch.amount = 0;
+    state.pinch.velocity = 0;
+  }
 
   state.hover = blend(state.hover, state.hoverTarget, HOVER_FOLLOW_SPEED, deltaSeconds);
   state.hoverPoint.x = blend(

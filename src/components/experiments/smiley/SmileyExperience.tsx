@@ -107,10 +107,10 @@ export function SmileyExperience() {
         ref={canvasRef}
         className={styles.canvas}
         tabIndex={0}
-        aria-label="A soft smiley sphere. Press anywhere to deform it, or pinch it with two fingers."
+        aria-label="A soft smiley sphere. Press anywhere to deform it, or squeeze and stretch it with two fingers."
         aria-describedby="smiley-hint smiley-status"
       />
-      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press or pinch me</p>
+      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press, pinch or stretch me</p>
       <p ref={statusRef} id="smiley-status" className={styles.status} aria-live="polite" />
     </div>
   );

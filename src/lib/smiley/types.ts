@@ -23,8 +23,17 @@ export type SmileyPressState = {
   pressureScale: number;
 };
 
+export type SmileyPinchState = {
+  active: boolean;
+  amount: number;
+  startDistance: number;
+  targetAmount: number;
+  velocity: number;
+};
+
 export type SmileyInteractionState = {
   presses: [SmileyPressState, SmileyPressState];
+  pinch: SmileyPinchState;
   hover: number;
   hoverTarget: number;
   hoverPoint: Vector2;

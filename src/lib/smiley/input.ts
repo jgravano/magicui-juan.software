@@ -41,7 +41,9 @@ const pointFromPointer = (
   };
 };
 
-const isInsideSphere = (point: Vector2) => Math.hypot(point.x, point.y) <= 1;
+const isInsideSphere = (point: Vector2, radius = 1) => (
+  Math.hypot(point.x, point.y) <= radius
+);
 
 const pressureScaleFromPointer = (event: PointerEvent) => {
   if (event.pointerType === "mouse") {
@@ -93,7 +95,9 @@ export const attachSmileyInput = ({
     const point = pointFromPointer(canvas, getLayout(), event.clientX, event.clientY);
     const slot = getAvailableSlot();
 
-    if (!isInsideSphere(point) || slot === null) {
+    const touchHitRadius = event.pointerType === "touch" ? 1.12 : 1;
+
+    if (!isInsideSphere(point, touchHitRadius) || slot === null) {
       return;
     }
 

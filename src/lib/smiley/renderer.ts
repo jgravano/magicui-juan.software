@@ -239,15 +239,12 @@ export const createSmileyRenderer = async (
     const pinchDeltaX = secondaryPress.contact.x - primaryPress.contact.x;
     const pinchDeltaY = secondaryPress.contact.y - primaryPress.contact.y;
     const pinchDistance = Math.hypot(pinchDeltaX, pinchDeltaY);
-    const pinchPresence = Math.max(0, Math.min(1, (pinchDistance - 0.16) / 0.34));
-    const pinchAmount = Math.min(
-      Math.max(primaryPress.amount, 0),
-      Math.max(secondaryPress.amount, 0),
-    ) * pinchPresence;
+    const pinchAmount = interaction.pinch.amount;
     const pinchAxisX = pinchDistance > 0.001 ? pinchDeltaX / pinchDistance : 1;
     const pinchAxisY = pinchDistance > 0.001 ? pinchDeltaY / pinchDistance : 0;
     const aggregatePressAmount = Math.min(
-      Math.max(primaryPress.amount, secondaryPress.amount, 0) + pinchAmount * 0.28,
+      Math.max(primaryPress.amount, secondaryPress.amount, 0)
+        + Math.max(pinchAmount, 0) * 0.42,
       1.32,
     );
     const objectCenterClipX = (layout.centerX / layout.viewportWidth) * 2 - 1;
