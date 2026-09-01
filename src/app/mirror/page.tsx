@@ -5,7 +5,7 @@ import { MirrorExperience } from "@/components/experiments/mirror/MirrorExperien
 
 export const metadata: Metadata = {
   title: "Mirror",
-  description: "A live camera image rendered in liquid chrome and particles.",
+  description: "A live reflection held inside a soft liquid-chrome object.",
 };
 
 export default function MirrorPage() {

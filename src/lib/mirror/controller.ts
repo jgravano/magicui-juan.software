@@ -405,6 +405,7 @@ export const createMirrorController = (payload: CreateMirrorControllerPayload): 
       frameClock.deltaSeconds,
     );
 
+    meltTarget = damp(meltTarget, 0, 0.82, frameClock.deltaSeconds);
     meltProgress = damp(meltProgress, meltTarget, 5.5, frameClock.deltaSeconds);
 
     interactionImpacts = interactionImpacts.filter((impact) => {

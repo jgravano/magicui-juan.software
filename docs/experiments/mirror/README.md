@@ -48,9 +48,43 @@ Current layered plan (object-first track):
 Status now:
 
 - layer 1 accepted as baseline direction (needs future polish)
-- layer 2 accepted as baseline direction (needs future polish)
-- layer 3 in active validation
-- layer 4 pending until layer 3 reads correctly
+- layer 2 accepted as baseline direction
+- layer 3 implemented as a curved, metal-integrated live reflection
+- layer 4 has a first visual-polish pass and remains open for live-subject tuning
+
+## Object Material Iteration (2026-09-01)
+
+This pass concentrates on the gap between a camera crop and a convincing reflective object.
+
+Changes:
+
+- enlarged the capsule into the primary visual presence while keeping the composition quiet
+- replaced generic radial shading with capsule-aware surface normals
+- introduced a studio environment model with softbox, horizon, rim, and side-sweep lighting
+- remapped the camera across the object so the reflection bends through the end caps instead of reading as a flat panel
+- changed reflection compositing from additive video brightness to a controlled metal/reflection blend
+- added responsive geometry so the object retains useful margins and volume on portrait screens
+- added a material-only fallback when camera video is unavailable
+- changed click-driven melt from cumulative deformation to a temporary impact that recovers
+
+Validation outcome:
+
+- the resting state reads as a dimensional chrome artifact before camera content is considered
+- the live image remains identifiable but is visibly carried by the surface curvature and studio highlights
+- the capsule keeps a coherent silhouette on desktop and mobile viewports
+- the product route remains clean while staged debug views continue to isolate object, material, reflection, and polish
+
+### Stable Reflection + Light Pass
+
+The follow-up pass separates material motion from camera motion more strictly:
+
+- camera cover framing now uses a restrained capsule-aware aspect instead of the full viewport aspect
+- convex projection is clamped and reduced so faces remain readable without a funhouse-mirror stretch
+- animated liquid, melt, and impact offsets no longer drift the camera texture independently
+- object deformation still changes the reflection through the deformed surface coordinates
+- a soft resting highlight remains present without pointer hover
+- a small fixed spectral caustic echoes the landing object without applying a full-surface rainbow film
+- hover light remains an additive, local response rather than the only visible light source
 
 Lineage commitment:
 
@@ -320,8 +354,8 @@ Current status:
 
 ## Next Locked Steps
 
-1. polish liquid chrome materiality (highlight shaping, depth cues, temporal coherence).
-2. optimize liquid shader performance across quality tiers.
+1. tune reflection framing and roughness with a moving live subject across varied lighting.
+2. profile and optimize the liquid shader across quality tiers.
 3. resume particle only after liquid reaches target quality bar.
 
 ## Resonance Lineage (Reuse)
@@ -342,7 +376,7 @@ Not reused directly:
 
 - Segmentation model is fetched from official remote assets at runtime.
 - Particle shape quality depends on camera lighting and subject contrast.
-- Liquid mode is Canvas2D-based, not a physically based shader pipeline.
+- Liquid mode is an authored real-time WebGL2 material, not a physically based renderer.
 - Current silhouette refinement is tuned for one dominant subject in frame.
 
 ## Future Evolutions
