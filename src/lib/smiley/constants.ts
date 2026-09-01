@@ -28,8 +28,9 @@ export const PINCH_MAX_SQUEEZE = 1.12;
 export const PINCH_MAX_STRETCH = 0.72;
 export const PINCH_PRESS_STIFFNESS = 118;
 export const PINCH_PRESS_DAMPING = 12;
-export const PINCH_RELEASE_STIFFNESS = 50;
-export const PINCH_RELEASE_DAMPING = 5.2;
+export const PINCH_RELEASE_STIFFNESS = 58;
+export const PINCH_RELEASE_DAMPING = 4.1;
+export const PINCH_RELEASE_REBOUND_SPEED = 2.2;
 export const PINCH_RELEASE_WOBBLE_IMPULSE = 1.8;
 
 export const INITIAL_PRESS_STRENGTH = 0.66;

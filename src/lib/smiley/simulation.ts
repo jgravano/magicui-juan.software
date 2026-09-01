@@ -10,6 +10,7 @@ import {
   PINCH_PRESS_DAMPING,
   PINCH_PRESS_STIFFNESS,
   PINCH_RELEASE_DAMPING,
+  PINCH_RELEASE_REBOUND_SPEED,
   PINCH_RELEASE_STIFFNESS,
   PINCH_RELEASE_WOBBLE_IMPULSE,
   PINCH_TRAVEL_FOR_FULL_STRETCH,
@@ -154,10 +155,25 @@ export const endSmileyPress = (
     return;
   }
 
-  const pinchReleaseAmount = state.pinch.active ? Math.abs(state.pinch.amount) : 0;
+  const pinchReleaseDisplacement = state.pinch.active ? state.pinch.amount : 0;
+  const pinchReleaseAmount = Math.abs(pinchReleaseDisplacement);
   press.isPressed = false;
   press.heldSeconds = 0;
   updatePinchTarget(state);
+
+  if (pinchReleaseAmount > 0.02) {
+    const existingSpeed = Math.min(
+      Math.abs(state.pinch.velocity),
+      pinchReleaseAmount * 3.2,
+    );
+    const reboundSpeed = Math.max(
+      existingSpeed,
+      pinchReleaseAmount * PINCH_RELEASE_REBOUND_SPEED,
+    );
+
+    state.pinch.velocity = -Math.sign(pinchReleaseDisplacement) * reboundSpeed;
+  }
+
   state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE
     + pinchReleaseAmount * PINCH_RELEASE_WOBBLE_IMPULSE;
 };

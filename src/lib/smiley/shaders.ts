@@ -117,6 +117,8 @@ void main() {
   position = pinchAxis * alongPinch + pinchPerpendicular * acrossPinch;
 
   float wobble = mix(uWobble, 0.0, uReduceMotion);
+  position.x *= 1.0 + wobble * 0.022;
+  position.y *= 1.0 - wobble * 0.030;
   position.x += wobble * 0.064 * sin((position.y + 1.0) * 2.25);
   position.y -= wobble * 0.036 * sin((position.x + 0.35) * 2.65);
 
