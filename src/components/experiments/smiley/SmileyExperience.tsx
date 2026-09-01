@@ -12,6 +12,7 @@ import {
   endSmileyPress,
   moveSmileyPress,
   setSmileyHover,
+  triggerSmileyPulse,
 } from "@/lib/smiley/simulation";
 
 export function SmileyExperience() {
@@ -50,6 +51,7 @@ export function SmileyExperience() {
         detachInput = attachSmileyInput({
           canvas,
           getLayout: renderer.getLayout,
+          onDoublePress: (point) => triggerSmileyPulse(interaction, point),
           onPressStart: (slot, point, pressure) => (
             beginSmileyPress(interaction, slot, point, pressure)
           ),
@@ -107,10 +109,10 @@ export function SmileyExperience() {
         ref={canvasRef}
         className={styles.canvas}
         tabIndex={0}
-        aria-label="A soft smiley sphere. Press anywhere to deform it, or squeeze and stretch it with two fingers."
+        aria-label="A soft smiley sphere. Press and drag to pull it, squeeze or stretch it with two fingers, or double press to make it pulse."
         aria-describedby="smiley-hint smiley-status"
       />
-      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press, pinch or stretch me</p>
+      <p ref={hintRef} id="smiley-hint" className={styles.hint}>press · drag · pinch · double tap</p>
       <p ref={statusRef} id="smiley-status" className={styles.status} aria-live="polite" />
     </div>
   );

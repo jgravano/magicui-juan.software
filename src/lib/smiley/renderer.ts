@@ -190,7 +190,11 @@ export const createSmileyRenderer = async (
     aspect: getUniform(gl, backgroundProgram, "uAspect"),
     objectCenter: getUniform(gl, backgroundProgram, "uObjectCenter"),
     objectRadius: getUniform(gl, backgroundProgram, "uObjectRadius"),
+    shadowOffset: getUniform(gl, backgroundProgram, "uShadowOffset"),
+    dragOffset: getUniform(gl, backgroundProgram, "uDragOffset"),
     pressAmount: getUniform(gl, backgroundProgram, "uPressAmount"),
+    pinchAmount: getUniform(gl, backgroundProgram, "uPinchAmount"),
+    pulseAmount: getUniform(gl, backgroundProgram, "uPulseAmount"),
     wobble: getUniform(gl, backgroundProgram, "uWobble"),
   };
   const objectUniforms = {
@@ -203,6 +207,10 @@ export const createSmileyRenderer = async (
     pressAmountB: getUniform(gl, objectProgram, "uPressAmountB"),
     pinchAmount: getUniform(gl, objectProgram, "uPinchAmount"),
     pinchAxis: getUniform(gl, objectProgram, "uPinchAxis"),
+    dragPoint: getUniform(gl, objectProgram, "uDragPoint"),
+    dragOffset: getUniform(gl, objectProgram, "uDragOffset"),
+    pulsePoint: getUniform(gl, objectProgram, "uPulsePoint"),
+    pulseAmount: getUniform(gl, objectProgram, "uPulseAmount"),
     hoverPoint: getUniform(gl, objectProgram, "uHoverPoint"),
     hoverAmount: getUniform(gl, objectProgram, "uHoverAmount"),
     wobble: getUniform(gl, objectProgram, "uWobble"),
@@ -264,7 +272,19 @@ export const createSmileyRenderer = async (
     gl.uniform1f(backgroundUniforms.aspect, layout.viewportWidth / layout.viewportHeight);
     gl.uniform2f(backgroundUniforms.objectCenter, objectCenterUvX, objectCenterUvY);
     gl.uniform2f(backgroundUniforms.objectRadius, objectRadiusUvX, objectRadiusUvY);
+    gl.uniform2f(
+      backgroundUniforms.shadowOffset,
+      interaction.shadow.offset.x,
+      interaction.shadow.offset.y,
+    );
+    gl.uniform2f(
+      backgroundUniforms.dragOffset,
+      interaction.drag.offset.x,
+      interaction.drag.offset.y,
+    );
     gl.uniform1f(backgroundUniforms.pressAmount, aggregatePressAmount);
+    gl.uniform1f(backgroundUniforms.pinchAmount, pinchAmount);
+    gl.uniform1f(backgroundUniforms.pulseAmount, interaction.pulse.amount);
     gl.uniform1f(backgroundUniforms.wobble, interaction.wobble);
     gl.bindVertexArray(backgroundVao);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
@@ -291,6 +311,22 @@ export const createSmileyRenderer = async (
     gl.uniform1f(objectUniforms.pressAmountB, secondaryPress.amount);
     gl.uniform1f(objectUniforms.pinchAmount, pinchAmount);
     gl.uniform2f(objectUniforms.pinchAxis, pinchAxisX, pinchAxisY);
+    gl.uniform2f(
+      objectUniforms.dragPoint,
+      interaction.drag.anchor.x,
+      interaction.drag.anchor.y,
+    );
+    gl.uniform2f(
+      objectUniforms.dragOffset,
+      interaction.drag.offset.x,
+      interaction.drag.offset.y,
+    );
+    gl.uniform2f(
+      objectUniforms.pulsePoint,
+      interaction.pulse.point.x,
+      interaction.pulse.point.y,
+    );
+    gl.uniform1f(objectUniforms.pulseAmount, interaction.pulse.amount);
     gl.uniform2f(
       objectUniforms.hoverPoint,
       interaction.hoverPoint.x,

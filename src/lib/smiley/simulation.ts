@@ -1,5 +1,12 @@
 import {
   CONTACT_FOLLOW_SPEED,
+  DRAG_FOLLOW_DAMPING,
+  DRAG_FOLLOW_STIFFNESS,
+  DRAG_MAX_OFFSET,
+  DRAG_PULL_GAIN,
+  DRAG_RELEASE_DAMPING,
+  DRAG_RELEASE_STIFFNESS,
+  DRAG_RELEASE_WOBBLE_IMPULSE,
   HOLD_PRESS_DURATION_SECONDS,
   HOLD_PRESS_GAIN,
   HOVER_FOLLOW_SPEED,
@@ -17,8 +24,15 @@ import {
   PINCH_TRAVEL_FOR_FULL_SQUEEZE,
   PRESS_DAMPING,
   PRESS_STIFFNESS,
+  PULSE_DAMPING,
+  PULSE_IMPULSE,
+  PULSE_MAX_AMOUNT,
+  PULSE_STIFFNESS,
   RELEASE_DAMPING,
   RELEASE_STIFFNESS,
+  SHADOW_DRAG_FOLLOW,
+  SHADOW_FOLLOW_DAMPING,
+  SHADOW_FOLLOW_STIFFNESS,
   WOBBLE_DAMPING,
   WOBBLE_RELEASE_IMPULSE,
   WOBBLE_STIFFNESS,
@@ -44,6 +58,19 @@ const clampPointToSphere = (point: Vector2): Vector2 => {
   return {
     x: (point.x / length) * 0.96,
     y: (point.y / length) * 0.96,
+  };
+};
+
+const clampVectorLength = (vector: Vector2, maximumLength: number): Vector2 => {
+  const length = Math.hypot(vector.x, vector.y);
+
+  if (length <= maximumLength) {
+    return vector;
+  }
+
+  return {
+    x: (vector.x / length) * maximumLength,
+    y: (vector.y / length) * maximumLength,
   };
 };
 
@@ -90,6 +117,36 @@ const updatePinchTarget = (state: SmileyInteractionState) => {
     : Math.max(distanceDelta / PINCH_TRAVEL_FOR_FULL_STRETCH, -PINCH_MAX_STRETCH);
 };
 
+const updateDragTarget = (state: SmileyInteractionState) => {
+  const activePress = state.presses.find((press) => press.isPressed);
+  const activePressCount = Number(state.presses[0].isPressed)
+    + Number(state.presses[1].isPressed);
+
+  if (!activePress || activePressCount !== 1) {
+    state.drag.active = false;
+    state.drag.targetOffset.x = 0;
+    state.drag.targetOffset.y = 0;
+    return;
+  }
+
+  if (!state.drag.active) {
+    state.drag.active = true;
+    state.drag.anchor.x = activePress.targetContact.x;
+    state.drag.anchor.y = activePress.targetContact.y;
+    state.drag.targetOffset.x = 0;
+    state.drag.targetOffset.y = 0;
+    return;
+  }
+
+  const targetOffset = clampVectorLength({
+    x: (activePress.targetContact.x - state.drag.anchor.x) * DRAG_PULL_GAIN,
+    y: (activePress.targetContact.y - state.drag.anchor.y) * DRAG_PULL_GAIN,
+  }, DRAG_MAX_OFFSET);
+
+  state.drag.targetOffset.x = targetOffset.x;
+  state.drag.targetOffset.y = targetOffset.y;
+};
+
 export const createSmileyInteractionState = (): SmileyInteractionState => ({
   presses: [createPressState(), createPressState()],
   pinch: {
@@ -98,6 +155,22 @@ export const createSmileyInteractionState = (): SmileyInteractionState => ({
     startDistance: 0,
     targetAmount: 0,
     velocity: 0,
+  },
+  drag: {
+    active: false,
+    anchor: { x: 0, y: 0 },
+    offset: { x: 0, y: 0 },
+    targetOffset: { x: 0, y: 0 },
+    velocity: { x: 0, y: 0 },
+  },
+  pulse: {
+    amount: 0,
+    point: { x: 0, y: 0 },
+    velocity: 0,
+  },
+  shadow: {
+    offset: { x: 0, y: 0 },
+    velocity: { x: 0, y: 0 },
   },
   hover: 0,
   hoverTarget: 0,
@@ -129,6 +202,7 @@ export const beginSmileyPress = (
   }
 
   updatePinchTarget(state);
+  updateDragTarget(state);
 };
 
 export const moveSmileyPress = (
@@ -143,6 +217,7 @@ export const moveSmileyPress = (
   state.targetHoverPoint = contact;
   press.pressureScale = pressureScale;
   updatePinchTarget(state);
+  updateDragTarget(state);
 };
 
 export const endSmileyPress = (
@@ -157,9 +232,13 @@ export const endSmileyPress = (
 
   const pinchReleaseDisplacement = state.pinch.active ? state.pinch.amount : 0;
   const pinchReleaseAmount = Math.abs(pinchReleaseDisplacement);
+  const dragReleaseAmount = state.drag.active
+    ? Math.hypot(state.drag.offset.x, state.drag.offset.y)
+    : 0;
   press.isPressed = false;
   press.heldSeconds = 0;
   updatePinchTarget(state);
+  updateDragTarget(state);
 
   if (pinchReleaseAmount > 0.02) {
     const existingSpeed = Math.min(
@@ -175,7 +254,17 @@ export const endSmileyPress = (
   }
 
   state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE
-    + pinchReleaseAmount * PINCH_RELEASE_WOBBLE_IMPULSE;
+    + pinchReleaseAmount * PINCH_RELEASE_WOBBLE_IMPULSE
+    + dragReleaseAmount * DRAG_RELEASE_WOBBLE_IMPULSE;
+};
+
+export const triggerSmileyPulse = (
+  state: SmileyInteractionState,
+  point: Vector2,
+) => {
+  state.pulse.point = clampPointToSphere(point);
+  state.pulse.velocity += PULSE_IMPULSE * (1 - Math.min(Math.abs(state.pulse.amount), 0.5) * 0.35);
+  state.wobbleVelocity += 0.48;
 };
 
 export const setSmileyHover = (
@@ -263,6 +352,80 @@ export const advanceSmileyInteraction = (
   ) {
     state.pinch.amount = 0;
     state.pinch.velocity = 0;
+  }
+
+  const dragIsDriven = state.drag.active;
+  const dragStiffness = dragIsDriven
+    ? DRAG_FOLLOW_STIFFNESS
+    : DRAG_RELEASE_STIFFNESS;
+  const dragDamping = reduceMotion
+    ? DRAG_FOLLOW_DAMPING * 2.4
+    : dragIsDriven
+      ? DRAG_FOLLOW_DAMPING
+      : DRAG_RELEASE_DAMPING;
+
+  state.drag.velocity.x += (
+    state.drag.targetOffset.x - state.drag.offset.x
+  ) * dragStiffness * deltaSeconds;
+  state.drag.velocity.y += (
+    state.drag.targetOffset.y - state.drag.offset.y
+  ) * dragStiffness * deltaSeconds;
+  const dragDecay = Math.exp(-dragDamping * deltaSeconds);
+  state.drag.velocity.x *= dragDecay;
+  state.drag.velocity.y *= dragDecay;
+  state.drag.offset.x += state.drag.velocity.x * deltaSeconds;
+  state.drag.offset.y += state.drag.velocity.y * deltaSeconds;
+
+  const clampedDragOffset = clampVectorLength(
+    state.drag.offset,
+    DRAG_MAX_OFFSET * 1.08,
+  );
+  state.drag.offset.x = clampedDragOffset.x;
+  state.drag.offset.y = clampedDragOffset.y;
+
+  if (
+    !state.drag.active
+    && Math.hypot(state.drag.offset.x, state.drag.offset.y) < 0.0005
+    && Math.hypot(state.drag.velocity.x, state.drag.velocity.y) < 0.002
+  ) {
+    state.drag.offset.x = 0;
+    state.drag.offset.y = 0;
+    state.drag.velocity.x = 0;
+    state.drag.velocity.y = 0;
+  }
+
+  const shadowTargetX = state.drag.offset.x * SHADOW_DRAG_FOLLOW;
+  const shadowTargetY = state.drag.offset.y * SHADOW_DRAG_FOLLOW;
+  state.shadow.velocity.x += (
+    shadowTargetX - state.shadow.offset.x
+  ) * SHADOW_FOLLOW_STIFFNESS * deltaSeconds;
+  state.shadow.velocity.y += (
+    shadowTargetY - state.shadow.offset.y
+  ) * SHADOW_FOLLOW_STIFFNESS * deltaSeconds;
+  const shadowDecay = Math.exp(
+    -SHADOW_FOLLOW_DAMPING * (reduceMotion ? 2.2 : 1) * deltaSeconds,
+  );
+  state.shadow.velocity.x *= shadowDecay;
+  state.shadow.velocity.y *= shadowDecay;
+  state.shadow.offset.x += state.shadow.velocity.x * deltaSeconds;
+  state.shadow.offset.y += state.shadow.velocity.y * deltaSeconds;
+
+  if (reduceMotion) {
+    state.pulse.amount = blend(state.pulse.amount, 0, 22, deltaSeconds);
+    state.pulse.velocity = 0;
+  } else {
+    state.pulse.velocity += -state.pulse.amount * PULSE_STIFFNESS * deltaSeconds;
+    state.pulse.velocity *= Math.exp(-PULSE_DAMPING * deltaSeconds);
+    state.pulse.amount += state.pulse.velocity * deltaSeconds;
+    state.pulse.amount = Math.max(
+      -PULSE_MAX_AMOUNT * 0.52,
+      Math.min(PULSE_MAX_AMOUNT, state.pulse.amount),
+    );
+  }
+
+  if (Math.abs(state.pulse.amount) < 0.0004 && Math.abs(state.pulse.velocity) < 0.002) {
+    state.pulse.amount = 0;
+    state.pulse.velocity = 0;
   }
 
   state.hover = blend(state.hover, state.hoverTarget, HOVER_FOLLOW_SPEED, deltaSeconds);

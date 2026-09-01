@@ -31,9 +31,31 @@ export type SmileyPinchState = {
   velocity: number;
 };
 
+export type SmileyDragState = {
+  active: boolean;
+  anchor: Vector2;
+  offset: Vector2;
+  targetOffset: Vector2;
+  velocity: Vector2;
+};
+
+export type SmileyPulseState = {
+  amount: number;
+  point: Vector2;
+  velocity: number;
+};
+
+export type SmileyShadowState = {
+  offset: Vector2;
+  velocity: Vector2;
+};
+
 export type SmileyInteractionState = {
   presses: [SmileyPressState, SmileyPressState];
   pinch: SmileyPinchState;
+  drag: SmileyDragState;
+  pulse: SmileyPulseState;
+  shadow: SmileyShadowState;
   hover: number;
   hoverTarget: number;
   hoverPoint: Vector2;

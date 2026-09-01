@@ -33,6 +33,28 @@ export const PINCH_RELEASE_DAMPING = 4.1;
 export const PINCH_RELEASE_REBOUND_SPEED = 2.2;
 export const PINCH_RELEASE_WOBBLE_IMPULSE = 1.8;
 
+export const DRAG_PULL_GAIN = 0.31;
+export const DRAG_MAX_OFFSET = 0.24;
+export const DRAG_FOLLOW_STIFFNESS = 96;
+export const DRAG_FOLLOW_DAMPING = 13.5;
+export const DRAG_RELEASE_STIFFNESS = 46;
+export const DRAG_RELEASE_DAMPING = 4.9;
+export const DRAG_RELEASE_WOBBLE_IMPULSE = 2.4;
+
+export const SHADOW_FOLLOW_STIFFNESS = 34;
+export const SHADOW_FOLLOW_DAMPING = 8.4;
+export const SHADOW_DRAG_FOLLOW = 0.62;
+
+export const PULSE_STIFFNESS = 88;
+export const PULSE_DAMPING = 5.6;
+export const PULSE_IMPULSE = 4.8;
+export const PULSE_MAX_AMOUNT = 0.62;
+
+export const DOUBLE_TAP_MAX_DELAY_MS = 330;
+export const TAP_MAX_DURATION_MS = 280;
+export const TAP_MOVE_TOLERANCE = 0.14;
+export const TAP_POSITION_TOLERANCE = 0.38;
+
 export const INITIAL_PRESS_STRENGTH = 0.66;
 export const HOLD_PRESS_GAIN = 0.4;
 export const HOLD_PRESS_DURATION_SECONDS = 0.65;
