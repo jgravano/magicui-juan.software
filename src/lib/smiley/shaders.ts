@@ -43,7 +43,10 @@ vec2 coverUv(vec2 uv, float aspect) {
 
 void main() {
   vec3 background = texture(uBackground, coverUv(vUv, uAspect)).rgb;
-  float compression = max(uPressAmount, 0.0);
+  float pinchStretch = max(-uPinchAmount, 0.0);
+  float stretchContactRelease = smoothstep(0.015, 0.32, pinchStretch);
+  float contactPressScale = mix(1.0, 0.08, stretchContactRelease);
+  float compression = max(uPressAmount, 0.0) * contactPressScale;
   float pinchLoad = abs(uPinchAmount);
   float dragDistance = length(uDragOffset);
   float lift = max(uDragOffset.y, 0.0);
@@ -128,12 +131,16 @@ void applyPress(inout vec2 position, vec2 pressPoint, float pressAmount) {
 
 void main() {
   vec2 position = aPosition;
-  applyPress(position, uPressPointA, uPressAmountA);
-  applyPress(position, uPressPointB, uPressAmountB);
-
   float pinchSqueeze = max(uPinchAmount, 0.0);
   float pinchStretch = max(-uPinchAmount, 0.0);
-  float compression = max(max(uPressAmountA, uPressAmountB) - pinchSqueeze * 0.62, 0.0);
+  float stretchContactRelease = smoothstep(0.015, 0.32, pinchStretch);
+  float contactPressScale = mix(1.0, 0.08, stretchContactRelease);
+  float pressAmountA = uPressAmountA * contactPressScale;
+  float pressAmountB = uPressAmountB * contactPressScale;
+  applyPress(position, uPressPointA, pressAmountA);
+  applyPress(position, uPressPointB, pressAmountB);
+
+  float compression = max(max(pressAmountA, pressAmountB) - pinchSqueeze * 0.62, 0.0);
   position.x *= 1.0 + compression * 0.064;
   position.y *= 1.0 - compression * 0.048;
 
@@ -241,6 +248,10 @@ void main() {
   float surfaceEdge = smoothstep(0.30, 0.94, radialDistance);
   float pinchSqueeze = max(uPinchAmount, 0.0);
   float pinchStretch = max(-uPinchAmount, 0.0);
+  float stretchContactRelease = smoothstep(0.015, 0.32, pinchStretch);
+  float contactPressScale = mix(1.0, 0.08, stretchContactRelease);
+  float pressAmountA = uPressAmountA * contactPressScale;
+  float pressAmountB = uPressAmountB * contactPressScale;
   float tension = (
     pinchStretch * axisAlignment + pinchSqueeze * (1.0 - axisAlignment)
   ) * surfaceEdge;
@@ -259,10 +270,10 @@ void main() {
   vec3 color = source.rgb;
   float sourceLuminance = dot(source.rgb, vec3(0.2126, 0.7152, 0.0722));
   float materialMask = smoothstep(0.08, 0.44, sourceLuminance);
-  float shade = pressureShade(vLocalPosition, uPressPointA, uPressAmountA)
-    + pressureShade(vLocalPosition, uPressPointB, uPressAmountB);
-  float glow = pressureGlow(vLocalPosition, uPressPointA, uPressAmountA)
-    + pressureGlow(vLocalPosition, uPressPointB, uPressAmountB);
+  float shade = pressureShade(vLocalPosition, uPressPointA, pressAmountA)
+    + pressureShade(vLocalPosition, uPressPointB, pressAmountB);
+  float glow = pressureGlow(vLocalPosition, uPressPointA, pressAmountA)
+    + pressureGlow(vLocalPosition, uPressPointB, pressAmountB);
   color *= 1.0 + shade;
   color *= 1.0 - materialMask * (compression * 0.034 + dragTension * 0.055);
   color += vec3(1.0, 0.73, 0.24) * glow;
