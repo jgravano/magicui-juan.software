@@ -517,7 +517,14 @@ export const createMirrorController = (payload: CreateMirrorControllerPayload): 
     resize();
     window.addEventListener("resize", resize);
 
+    // The chrome object appears immediately while camera permission resolves.
+    previousTimestampMs = performance.now();
+    animationFrameId = window.requestAnimationFrame(frame);
     await webcam.start();
+    if (!running) {
+      webcam.stop();
+      return;
+    }
 
     if (webcam.status === "error") {
       setNotice(webcam.errorMessage ?? "Camera access was denied.");
@@ -525,8 +532,6 @@ export const createMirrorController = (payload: CreateMirrorControllerPayload): 
       setNotice(debug.enabled ? stageNotice(debug.stage) : null);
     }
 
-    previousTimestampMs = performance.now();
-    animationFrameId = window.requestAnimationFrame(frame);
     emitState(true);
   };
 

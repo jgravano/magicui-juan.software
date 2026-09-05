@@ -104,6 +104,38 @@ Particle pause state:
 - particle modules remain in repo (`src/lib/creative/segmentation/*`, `src/lib/creative/particles/*`, `src/lib/mirror/renderers/phase4Baseline.ts`)
 - current `/mirror` does not initialize segmentation/particle simulation
 
+## Polished chrome reflection (2026-09-04)
+
+- Replaced stacked additive lighting and iridescent film with a neutral reflective
+  material. Camera color is decoded to linear light before mixing with studio
+  radiance, then converted back for display with a highlight shoulder.
+- The center has a gentle crown and the capsule edges roll sharply into reflected
+  softboxes, black flags and a lower strip light. Lighting and camera deformation
+  share the same surface normal, including tap-driven height ripples.
+- Camera projection uses equal screen-space scale with source aspect compensation,
+  and mirrors horizontally exactly once. A smooth camera-frustum transition blends
+  to the studio at the boundaries instead of stretching clamped border pixels.
+- Five camera samples replace fifteen; background fragments skip material sampling.
+- The object renders while camera startup is pending. A controller stopped during
+  startup releases the camera when the pending request resolves.
+
+Validation: TypeScript, targeted ESLint, live camera shader compilation/rendering,
+portrait viewport framing, and browser error logs. This is still an authored 2.5D
+reflection: the camera supplies the forward view; off-camera room lighting is a
+procedural studio environment, not a captured 360-degree environment map.
+
+### Softer lights and material folds
+
+The follow-up material pass replaces the uniform white rim and cursor flashlight
+with oblique, finite reflected light sources. A localized warm/violet/cyan source
+is evaluated in reflection space, so its bands stretch through the same normals
+as the camera reflection. Broad shallow folds, pointer indentation and decaying
+tap ripples now drive both normals and camera projection. The slight resting
+movement is deliberately slow; it does not depend on camera brightness.
+
+Validated with a live camera, tap deformation, TypeScript and targeted ESLint;
+no browser errors were reported after reloading the updated shader.
+
 ## Legacy Fullscreen/Particle Rebuild Log (Archived Lineage)
 
 The sections below are preserved historical checkpoints from the previous fullscreen-first rebuild.

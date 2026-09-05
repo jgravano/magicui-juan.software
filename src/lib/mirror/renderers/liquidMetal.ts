@@ -69,27 +69,7 @@ float saturate(float value) {
 }
 
 vec2 coverUv(vec2 uv) {
-  float sourceAspect = u_videoResolution.x / max(u_videoResolution.y, 1.0);
-  float viewportAspect = u_resolution.x / max(u_resolution.y, 1.0);
-  float targetHalfWidth = min(0.405, viewportAspect * 0.415);
-  float objectAspect = targetHalfWidth / 0.128;
-  float targetAspect = clamp(
-    mix(max(viewportAspect, 1.35), objectAspect, 0.32),
-    1.6,
-    2.2
-  );
-  vec2 mapped = uv;
-
-  if (sourceAspect > targetAspect) {
-    float scaleX = targetAspect / sourceAspect;
-    mapped.x = (uv.x - 0.5) * scaleX + 0.5;
-  } else {
-    float scaleY = sourceAspect / targetAspect;
-    mapped.y = (uv.y - 0.5) * scaleY + 0.5;
-  }
-
-  mapped.x = 1.0 - mapped.x;
-  return clamp(mapped, vec2(0.001), vec2(0.999));
+  return clamp(vec2(1.0 - uv.x, uv.y), vec2(0.001), vec2(0.999));
 }
 
 float sdRoundedBox(vec2 point, vec2 halfSize, float radius) {
@@ -101,25 +81,49 @@ vec3 sampleVideo(vec2 uv) {
   return texture(u_video, coverUv(clamp(uv, vec2(0.0), vec2(1.0)))).rgb;
 }
 
-vec3 sampleVideoBlur(vec2 uv, float radius, vec2 axis) {
-  vec2 texel = 1.0 / max(u_resolution, vec2(1.0));
-  vec2 offset = axis * texel * radius;
-  vec2 cross = vec2(offset.y, -offset.x);
-
-  vec3 color = sampleVideo(uv) * 0.32;
-  color += sampleVideo(uv + offset) * 0.16;
-  color += sampleVideo(uv - offset) * 0.16;
-  color += sampleVideo(uv + offset * 2.0) * 0.1;
-  color += sampleVideo(uv - offset * 2.0) * 0.1;
-  color += sampleVideo(uv + cross * 1.3) * 0.08;
-  color += sampleVideo(uv - cross * 1.3) * 0.08;
-
-  return color;
+vec3 sampleVideoBlur(vec2 uv, float radius) {
+  vec2 offset = vec2(radius) / max(u_videoResolution, vec2(1.0));
+  return sampleVideo(uv) * 0.6
+    + sampleVideo(uv + vec2(offset.x, 0.0)) * 0.1
+    + sampleVideo(uv - vec2(offset.x, 0.0)) * 0.1
+    + sampleVideo(uv + vec2(0.0, offset.y)) * 0.1
+    + sampleVideo(uv - vec2(0.0, offset.y)) * 0.1;
 }
 
-vec3 toneCompress(vec3 color) {
-  vec3 linear = max(color - vec3(0.004), vec3(0.0));
-  return (linear * (6.2 * linear + 0.5)) / (linear * (6.2 * linear + 1.7) + 0.06);
+// Finite, oblique sources in reflection space. Their shapes are distorted by
+// the surface normal, including the shallow folds and touch displacement.
+vec3 reflectedLights(vec3 ray) {
+  float front = smoothstep(-0.55, 0.55, ray.z);
+  float windowAxis = ray.y - 0.64 + ray.x * 0.16;
+  float window = exp(-pow(windowAxis / 0.24, 2.0))
+    * exp(-pow((ray.x + 0.28) / 0.68, 2.0));
+  float side = exp(-pow((ray.x + 0.78 + ray.y * 0.14) / 0.20, 2.0))
+    * exp(-pow((ray.y - 0.1) / 0.62, 2.0));
+  // A narrow colored source: warm, violet and cyan parts of the same light.
+  // Color belongs to the reflected source, not a film over the camera image.
+  float ribbonAxis = ray.y + 0.16 - ray.x * 0.22;
+  float ribbonEnvelope = exp(-pow((ray.x - 0.24) / 0.49, 2.0)) * front;
+  vec3 ribbon = vec3(0.0);
+  ribbon += vec3(0.72, 0.24, 0.065) * exp(-pow((ribbonAxis + 0.058) / 0.043, 2.0));
+  ribbon += vec3(0.32, 0.12, 0.60) * exp(-pow(ribbonAxis / 0.045, 2.0));
+  ribbon += vec3(0.10, 0.53, 0.68) * exp(-pow((ribbonAxis - 0.058) / 0.047, 2.0));
+  return vec3(0.64, 0.67, 0.71) * window
+    + vec3(0.45, 0.48, 0.52) * side + ribbon * ribbonEnvelope;
+}
+
+vec3 studioEnvironment(vec3 ray) {
+  float ceiling = smoothstep(-0.3, 0.9, ray.y);
+  vec3 room = mix(vec3(0.018, 0.019, 0.023), vec3(0.17, 0.185, 0.21), ceiling);
+  float flag = exp(-pow((ray.y + 0.38 + ray.x * 0.12) / 0.16, 2.0));
+  room *= 1.0 - flag * 0.65;
+  return room;
+}
+
+vec3 displayChrome(vec3 linearColor) {
+  // Gentle highlight shoulder, followed by display transfer. Camera inputs
+  // are decoded before compositing so lights do not bleach the midtones.
+  vec3 mapped = linearColor / (vec3(1.0) + linearColor * 0.42);
+  return pow(max(mapped, vec3(0.0)), vec3(1.0 / 2.2));
 }
 
 void main() {
@@ -203,7 +207,7 @@ void main() {
   sdf += geometryMelt * 0.012 - geometryPress * 0.004;
   sdf -= meltDrip;
   float antialiasWidth = max(fwidth(sdf) * 1.35, 0.0012);
-  float objectMask = smoothstep(antialiasWidth, -antialiasWidth, sdf);
+  float objectMask = (1.0 - smoothstep(-antialiasWidth, antialiasWidth, sdf));
 
   vec2 backdropUv = uv - vec2(0.5, 0.51);
   backdropUv.x *= aspect;
@@ -231,212 +235,86 @@ void main() {
   capsuleCoord = clamp(capsuleCoord, vec2(-1.0), vec2(1.0));
   float radial = dot(capsuleCoord, capsuleCoord);
   float dome = sqrt(max(0.0, 1.0 - radial));
-  vec3 normal = normalize(vec3(
-    capsuleCoord.x * 1.04 + local.x * 0.045,
-    capsuleCoord.y * 1.05,
-    dome * 1.16
-  ));
-  vec3 viewDir = vec3(0.0, 0.0, 1.0);
-  float fresnel = pow(1.0 - max(dot(normal, viewDir), 0.0), 2.35);
-  vec2 mouseCentered = u_mouseLight.xy - vec2(0.5, 0.525);
-  mouseCentered.x *= aspect;
-  vec2 mouseToSurface = mouseCentered - centered;
-  vec2 mouseDeltaNorm = mouseToSurface / vec2(0.26, 0.13);
-  float mouseFalloff = exp(-dot(mouseDeltaNorm, mouseDeltaNorm));
-  float mouseIntensity = u_mouseLight.z * interactionBlend * pow(mouseFalloff, 0.66) * 2.55;
-  vec3 mouseLightDir = normalize(vec3(mouseToSurface * vec2(2.8, 3.4), 0.86));
-  float mouseSpec = pow(max(dot(reflect(-mouseLightDir, normal), viewDir), 0.0), 96.0);
-  float mouseSpecBroad = pow(max(dot(reflect(-mouseLightDir, normal), viewDir), 0.0), 32.0);
-  float mouseSheen = max(dot(normal, mouseLightDir), 0.0) * mouseIntensity;
-  float mouseGrazing = smoothstep(0.12, 0.95, fresnel);
-
-  vec3 reflectedView = reflect(-viewDir, normal);
-  vec2 convexProjection = clamp(
-    reflectedView.xy / max(0.2, reflectedView.z + 1.08),
-    vec2(-1.2),
-    vec2(1.2)
-  );
-  vec2 reflectionObjectUv = vec2(
-    0.5 + local.x * 0.33 + convexProjection.x * 0.065,
-    0.5 + local.y * 0.235 + convexProjection.y * 0.055
-  );
-
-  float lumaSignal = texture(u_luma, uv).r;
-  float motionSignal = texture(u_motion, uv).r;
-  float activity = saturate(
-    u_motionEnergy * 0.7 + u_motionMean * 0.55 + u_motionPeak * 0.45 + motionSignal * 0.32
-  );
-
-  float impactSoften = geometryPress * 0.26;
-  float rippleField = 0.0;
-  float impactPress = geometryPress * 0.46;
-
+  // A gently crowned center preserves a readable face; the rolled edges
+  // turn sharply into the surrounding room. The same normal drives both.
+  float bevel = smoothstep(0.42, 1.0, sqrt(radial));
+  vec2 slope = capsuleCoord * mix(0.17, 1.5, bevel);
+  slope.x += local.x * 0.075;
+  // Broad, shallow folds make the metal optically imperfect without turning
+  // the face into a funhouse image. Motion is slow and spatially coherent.
+  float foldPhase = u_time * 0.18;
+  float foldEnvelope = 0.40 + 0.60 * smoothstep(0.1, 0.92, abs(local.y));
+  float dentHeight = (
+    sin(local.x * 5.2 + local.y * 3.8 + foldPhase) * 0.0016
+    + sin(local.x * 9.1 - local.y * 5.4 - foldPhase * 0.7) * 0.0007
+  ) * foldEnvelope * interactionBlend;
+  vec2 pointerDelta = (uv - u_mouseLight.xy) * vec2(aspect, 1.0);
+  dentHeight -= exp(-dot(pointerDelta, pointerDelta) * 170.0)
+    * 0.0028 * u_mouseLight.z * interactionBlend;
   for (int i = 0; i < MAX_IMPACTS; i += 1) {
-    if (i >= u_impactCount) {
-      break;
-    }
-
-    vec4 impact = u_impacts[i];
-    vec2 impactCentered = impact.xy - vec2(0.5, 0.525);
-    impactCentered.x *= aspect;
-
-    float age = impact.z;
-    float strength = impact.w;
-
-    vec2 fromImpact = centered - impactCentered;
-    vec2 impactNorm = fromImpact / vec2(0.33, 0.15);
-    float dist2 = dot(impactNorm, impactNorm);
-    float dist = sqrt(max(dist2, 0.00001));
-    float localEnvelope = exp(-dist2 * 9.2);
-    float coreEnvelope = exp(-age * 2.9) * strength;
-    float impactCore = localEnvelope * coreEnvelope * interactionBlend;
-
-    float wave =
-      sin(dist * 16.8 - age * 14.5) * exp(-dist * 3.0) * exp(-age * 3.0) * strength * interactionBlend;
-    impactSoften += impactCore * 0.92 + abs(wave) * 0.26;
-    impactPress += impactCore * (0.86 + fresnel * 0.24);
-
-    float rippleRadius = age * 1.42;
-    float rippleRing = exp(-pow((dist - rippleRadius) * 8.4, 2.0));
-    float rippleEnvelope = exp(-age * 2.45) * strength;
-    float ripple = rippleRing * rippleEnvelope * interactionBlend;
-
-    impactSoften += abs(ripple) * 0.34;
-    rippleField += abs(ripple);
-    impactPress += abs(ripple) * 0.34;
+    if (i >= u_impactCount) break;
+    vec2 delta = (uv - u_impacts[i].xy) * vec2(aspect, 1.0);
+    float distanceFromTap = length(delta);
+    float age = u_impacts[i].z;
+    float envelope = exp(-age * 3.4) * u_impacts[i].w * interactionBlend;
+    float ring = distanceFromTap - age * 0.22;
+    dentHeight += (cos(ring * 95.0) * exp(-ring * ring * 180.0)
+      - 1.4 * exp(-dot(delta, delta) * 520.0)) * envelope * 0.0025;
   }
-
-  impactSoften = clamp(impactSoften, 0.0, 0.95);
-  rippleField = clamp(rippleField, 0.0, 0.72);
-  impactPress = clamp(impactPress, 0.0, 1.0);
-  // The camera stays optically attached to the object. Shape deformation changes
-  // this mapping through local coordinates; there is no independent texture drift.
-  vec2 reflectionUv = reflectionObjectUv;
-
-  vec3 reflectionSharp = sampleVideo(reflectionUv);
-  float curvature = saturate(1.0 - dome);
-  float roughness = clamp(
-    0.075 + curvature * 0.13 + activity * 0.022 + lumaSignal * 0.008 + impactSoften * 0.7 + meltEase * 0.28,
-    0.06,
-    0.9
-  );
-  float blurRadius = mix(0.45, 6.2, roughness);
-  vec3 reflectionBlurMid = sampleVideoBlur(reflectionUv, blurRadius * 0.68, normalize(vec2(1.0, 0.38)));
-  vec3 reflectionBlurSoft = sampleVideoBlur(
-    reflectionUv,
-    blurRadius * 1.35,
-    normalize(vec2(0.48, 1.0))
-  );
-  vec3 reflectionFiltered = mix(reflectionBlurMid, reflectionBlurSoft, roughness * 0.34);
-  reflectionFiltered = mix(reflectionFiltered, reflectionSharp, 0.62 + (1.0 - roughness) * 0.17);
-
-  float reflectionLum = dot(reflectionFiltered, vec3(0.2126, 0.7152, 0.0722));
-  vec3 reflectionChroma = reflectionFiltered - vec3(reflectionLum);
-  vec3 reflectionColor = vec3(pow(reflectionLum, 0.86)) + reflectionChroma * 0.62;
-  reflectionColor *= mix(0.78, 1.17, smoothstep(0.08, 0.92, reflectionLum));
-  reflectionColor = mix(reflectionColor, vec3(reflectionLum), 0.28);
-
+  // Screen-space height derivatives keep highlight and image displacement
+  // coherent even when multiple ripples overlap.
+  vec2 dentSlope = vec2(dFdx(dentHeight), dFdy(dentHeight)) * u_resolution.y;
+  vec3 normal = normalize(vec3(slope - dentSlope, max(0.22, dome)));
+  vec3 viewDir = vec3(0.0, 0.0, 1.0);
+  // Derivatives above execute for every fragment before the background exit.
+  if (objectMask <= 0.0) {
+    outColor = vec4(background, 1.0);
+    return;
+  }
   float ndotv = max(dot(normal, viewDir), 0.0);
-  vec3 F0 = vec3(0.9, 0.92, 0.95);
-  vec3 fresnelSpec = F0 + (1.0 - F0) * pow(1.0 - ndotv, 5.0);
+  float fresnel = pow(1.0 - ndotv, 5.0);
+  vec3 metalReflectance = mix(vec3(0.91, 0.92, 0.935), vec3(1.0), fresnel);
+  vec3 reflectedView = reflect(-viewDir, normal);
 
-  float mercuryStress = clamp(impactPress * 0.72 + rippleField * 0.38 + meltEase * 0.64, 0.0, 1.0);
-  float filmPhase =
-    (1.0 - ndotv) * (8.0 + mercuryStress * 9.0) + u_time * 1.8 + local.x * 6.4 - local.y * 5.2;
-  vec3 mercuryFilm = 0.5 + 0.5 * cos(vec3(0.0, 2.09, 4.18) + filmPhase);
-  float mercuryStrength = mercuryStress * (0.12 + fresnel * 0.24);
-  reflectionColor = mix(
-    reflectionColor,
-    reflectionColor * (vec3(0.72) + mercuryFilm * 0.58),
-    clamp(mercuryStrength, 0.0, 0.36)
-  );
+  float sourceAspect = u_videoResolution.x / max(u_videoResolution.y, 1.0);
+  // Equal scale in screen space: no horizontal face stretch on wide pills.
+  // A finite reflection plane limits the camera to the forward-facing metal;
+  // the studio takes over before its sampling coordinates reach the border.
+  float cameraScale = 2.55;
+  vec2 projection = sdfPoint * cameraScale;
+  projection += normal.xy / max(normal.z, 0.4) * 0.055;
+  projection -= dentSlope * 0.16;
+  vec2 reflectionUv = vec2(0.5) + projection / vec2(sourceAspect, 1.0);
+  vec2 border = min(reflectionUv, 1.0 - reflectionUv);
+  float cameraFrustum = smoothstep(0.0, 0.09, min(border.x, border.y));
+  float forwardFace = smoothstep(0.28, 0.82, ndotv);
+  float reflectionWeight = u_hasVideo * cameraFrustum * forwardFace * 0.96;
 
-  float edgeDepth = 1.0 - smoothstep(0.004, 0.07, -sdf);
-  float cameraReadability = smoothstep(0.08, 0.9, dome);
-  float reflectionMask = u_hasVideo * clamp(0.39 + cameraReadability * 0.31 - edgeDepth * 0.18, 0.0, 0.7);
-  float surfaceShading = mix(0.72, 1.1, smoothstep(0.94, -0.72, capsuleCoord.y));
-  vec3 reflectionCarrier = reflectionColor * surfaceShading;
+  float activity = saturate(u_motionEnergy + u_motionMean + u_motionPeak
+    + texture(u_motion, uv).r);
+  float luma = texture(u_luma, uv).r;
+  float roughness = 0.35 + bevel * 1.1 + activity * 0.08 + luma * 0.02;
+  vec3 cameraColor = sampleVideoBlur(reflectionUv, roughness);
+  cameraColor = pow(max(cameraColor, vec3(0.0)), vec3(2.2));
+  // Chrome is neutral but still reflects the actual colors of the room.
+  float cameraLuma = dot(cameraColor, vec3(0.2126, 0.7152, 0.0722));
+  cameraColor = mix(vec3(cameraLuma), cameraColor, 0.90);
 
-  float envT = smoothstep(-0.94, 0.92, reflectedView.y);
-  vec3 envBottom = vec3(0.025, 0.035, 0.055);
-  vec3 envTop = vec3(0.68, 0.76, 0.88);
-  vec3 envColor = mix(envBottom, envTop, envT);
-  float softbox = exp(-pow((reflectedView.y - 0.36) * 4.7, 2.0));
-  float horizonDark = exp(-pow((reflectedView.y + 0.1) * 12.0, 2.0));
-  float lowerBounce = exp(-pow((reflectedView.y + 0.58) * 5.4, 2.0));
-  float sideSweep = exp(-pow((reflectedView.x + 0.5) * 4.0, 2.0));
-  envColor += vec3(0.42, 0.48, 0.58) * softbox;
-  envColor += vec3(0.11, 0.14, 0.2) * lowerBounce;
-  envColor += vec3(0.18, 0.22, 0.3) * sideSweep;
-  envColor *= 1.0 - horizonDark * 0.58;
+  vec3 environment = studioEnvironment(reflectedView);
+  vec3 sourceLights = reflectedLights(reflectedView);
+  vec3 phase1Color = (environment + sourceLights) * metalReflectance;
+  vec3 phase2Color = phase1Color;
+  vec3 phase3Color = mix(environment, cameraColor, reflectionWeight) * metalReflectance;
+  // One reflected-light pass replaces the uniform outline, second softbox
+  // overlay and cursor flashlight. Mid-surface color stays localized.
+  vec3 phase4Color = phase3Color + sourceLights * metalReflectance
+    * mix(1.0, 0.48, reflectionWeight);
 
-  vec3 keyDirection = normalize(vec3(-0.42, 0.62, 0.66));
-  vec3 fillDirection = normalize(vec3(0.66, -0.24, 0.72));
-  float keyLight = pow(max(dot(normal, keyDirection), 0.0), 18.0);
-  float keyBloom = pow(max(dot(normal, keyDirection), 0.0), 5.0);
-  float fillLight = pow(max(dot(normal, fillDirection), 0.0), 12.0);
-  vec3 studioLight = vec3(0.82, 0.89, 1.0) * (keyLight * 0.62 + keyBloom * 0.13);
-  studioLight += vec3(0.34, 0.42, 0.56) * fillLight * 0.24;
-
-  vec2 restGlintUv = vec2((local.x - 0.18) * 1.7, (local.y - 0.17) * 6.4);
-  float restGlintBloom = exp(-dot(restGlintUv, restGlintUv) * 1.5);
-  float restGlintCore = exp(-dot(restGlintUv, restGlintUv) * 6.0);
-  vec3 restingHighlight = vec3(0.76, 0.84, 0.96) * restGlintBloom * 0.12;
-  restingHighlight += vec3(0.98, 0.99, 1.0) * restGlintCore * 0.24;
-
-  float prismAxis = local.y - (-0.055 - (local.x - 0.08) * 0.16);
-  float prismEnvelope = exp(-pow((local.x - 0.08) * 4.6, 2.0));
-  prismEnvelope *= exp(-pow((local.y + 0.055) * 3.6, 2.0));
-  vec3 prismBands = vec3(
-    exp(-pow((prismAxis + 0.038) * 27.0, 2.0)),
-    exp(-pow(prismAxis * 29.0, 2.0)),
-    exp(-pow((prismAxis - 0.038) * 27.0, 2.0))
-  );
-  float prismStrength = 0.17 + mouseIntensity * 0.03 + mercuryStress * 0.045;
-  vec3 prismCaustic = prismBands * prismEnvelope * prismStrength;
-
-  studioLight += restingHighlight + prismCaustic;
-
-  vec3 metalBase = vec3(0.055, 0.07, 0.1);
-  vec3 phase1Color = mix(metalBase, envColor, 0.83);
-  phase1Color += studioLight;
-  phase1Color *= 1.0 - edgeDepth * 0.26;
-  phase1Color += fresnelSpec * fresnel * 0.12;
-
-  float satinFlowA = 0.5 + 0.5 * sin(local.x * 7.4 + local.y * 3.0 + u_time * 0.07);
-  float satinFlowB = 0.5 + 0.5 * cos(local.y * 9.0 - local.x * 1.8 - u_time * 0.05);
-  float satinFlow = satinFlowA * 0.58 + satinFlowB * 0.42;
-  vec3 phase2Color = phase1Color * mix(0.94, 1.045, satinFlow);
-  phase2Color += vec3(0.14, 0.18, 0.25) * pow(fresnel, 1.5) * 0.42;
-
-  float reflectionWeight = reflectionMask;
-  reflectionWeight += mouseIntensity * (0.03 + mouseSpecBroad * 0.08);
-  reflectionWeight *= 1.0 - impactPress * 0.16 - rippleField * 0.06 - meltEase * 0.12;
-  reflectionWeight = clamp(reflectionWeight, 0.0, 0.82);
-
-  vec3 phase3Color = mix(phase2Color, reflectionCarrier, reflectionWeight);
-  phase3Color += studioLight * (0.72 + fresnel * 0.3);
-  phase3Color += envColor * fresnel * 0.18;
-
-  float flashlightCore = (mouseSpec * 1.18 + mouseSpecBroad * 0.48) * mouseIntensity;
-  vec3 interactionHighlight = vec3(0.86, 0.93, 1.0) * flashlightCore * (0.28 + mouseGrazing * 0.82);
-  vec3 interactionSheen = vec3(0.09, 0.13, 0.2) * mouseSheen * (0.34 + fresnel * 0.52);
-  phase3Color += interactionHighlight + interactionSheen;
-  phase3Color = mix(phase3Color, phase2Color * 0.82 + reflectionCarrier * 0.18, impactPress * 0.3);
-
-  float clearcoat = (mouseSpec * 0.28 + mouseSpecBroad * 0.1) * mouseIntensity;
-  vec3 phase4Color = phase3Color + vec3(clearcoat) * materialBlend;
-  phase4Color += fresnelSpec * fresnel * (0.08 * materialBlend);
-
-  vec3 objectColor = phase1Color;
-  objectColor = mix(objectColor, phase2Color, reflectionBlend);
+  vec3 objectColor = mix(phase1Color, phase2Color, reflectionBlend);
   objectColor = mix(objectColor, phase3Color, liquidBlend);
   objectColor = mix(objectColor, phase4Color, materialBlend);
-  objectColor = mix(objectColor, toneCompress(objectColor), 0.32);
+  objectColor = displayChrome(objectColor);
 
-  float rim = 1.0 - smoothstep(0.0, 0.018, abs(sdf));
-  objectColor += vec3(0.72, 0.8, 0.92) * rim * (0.04 + fresnel * 0.1);
-  objectColor *= 1.0 - edgeDepth * 0.08;
 
   vec3 color = mix(background, objectColor, objectMask);
   float outerGlow = (1.0 - smoothstep(0.0, 0.055, abs(sdf))) * (1.0 - objectMask);

@@ -200,7 +200,7 @@ export function MirrorExperience() {
             layer3 reflection: {uiState.cameraStatus === "ready" && uiState.processing ? "active" : "pending"}
           </p>
           <p className="mirror-debug__line">
-            layer4 polish: pending
+            layer4 polish: {uiState.liquid?.shaderReady ? "active" : "pending"}
           </p>
           {uiState.processing ? (
             <>
