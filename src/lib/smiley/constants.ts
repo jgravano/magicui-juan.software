@@ -14,13 +14,13 @@ export const SOURCE_RADIUS_X = 0.36;
 export const SOURCE_RADIUS_Y = 0.36;
 export const MESH_SEGMENTS = 96;
 
-export const PRESS_STIFFNESS = 105;
-export const PRESS_DAMPING = 10.5;
-export const RELEASE_STIFFNESS = 52;
-export const RELEASE_DAMPING = 4.8;
+export const PRESS_STIFFNESS = 145;
+export const PRESS_DAMPING = 9.2;
+export const RELEASE_STIFFNESS = 76;
+export const RELEASE_DAMPING = 4.2;
 export const CONTACT_FOLLOW_SPEED = 18;
 export const HOVER_FOLLOW_SPEED = 12;
-export const MAX_FRAME_DELTA_SECONDS = 1 / 30;
+export const MAX_FRAME_DELTA_SECONDS = 0.1;
 
 export const PINCH_TRAVEL_FOR_FULL_SQUEEZE = 0.52;
 export const PINCH_TRAVEL_FOR_FULL_STRETCH = 0.46;
@@ -33,12 +33,12 @@ export const PINCH_RELEASE_DAMPING = 4.1;
 export const PINCH_RELEASE_REBOUND_SPEED = 2.2;
 export const PINCH_RELEASE_WOBBLE_IMPULSE = 1.8;
 
-export const DRAG_PULL_GAIN = 0.31;
-export const DRAG_MAX_OFFSET = 0.24;
-export const DRAG_FOLLOW_STIFFNESS = 96;
-export const DRAG_FOLLOW_DAMPING = 13.5;
-export const DRAG_RELEASE_STIFFNESS = 46;
-export const DRAG_RELEASE_DAMPING = 4.9;
+export const DRAG_PULL_GAIN = 0.72;
+export const DRAG_MAX_OFFSET = 0.62;
+export const DRAG_FOLLOW_STIFFNESS = 190;
+export const DRAG_FOLLOW_DAMPING = 17;
+export const DRAG_RELEASE_STIFFNESS = 70;
+export const DRAG_RELEASE_DAMPING = 4.4;
 export const DRAG_RELEASE_WOBBLE_IMPULSE = 2.4;
 
 export const SHADOW_FOLLOW_STIFFNESS = 34;
@@ -61,6 +61,14 @@ export const HOLD_PRESS_DURATION_SECONDS = 0.65;
 export const MIN_PRESSURE_SCALE = 0.92;
 export const MAX_PRESSURE_SCALE = 1.12;
 
-export const WOBBLE_STIFFNESS = 26;
-export const WOBBLE_DAMPING = 3.1;
+export const WOBBLE_STIFFNESS = 42;
+export const WOBBLE_DAMPING = 3.6;
 export const WOBBLE_RELEASE_IMPULSE = 2.7;
+
+// Fixed integration keeps the same material response at 30–144 Hz.
+export const PHYSICS_STEP_SECONDS = 1 / 240;
+export const BODY_STIFFNESS = 95;
+export const BODY_DAMPING = 5.8;
+export const MAX_WOBBLE_SPEED = 6;
+export const MAX_PULSE_SPEED = 8;
+export const MAX_WOBBLE_AMOUNT = 0.9;

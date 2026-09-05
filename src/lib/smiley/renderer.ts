@@ -207,6 +207,7 @@ export const createSmileyRenderer = async (
     pressAmountB: getUniform(gl, objectProgram, "uPressAmountB"),
     pinchAmount: getUniform(gl, objectProgram, "uPinchAmount"),
     pinchAxis: getUniform(gl, objectProgram, "uPinchAxis"),
+    bodyOffset: getUniform(gl, objectProgram, "uBodyOffset"),
     dragPoint: getUniform(gl, objectProgram, "uDragPoint"),
     dragOffset: getUniform(gl, objectProgram, "uDragOffset"),
     pulsePoint: getUniform(gl, objectProgram, "uPulsePoint"),
@@ -309,6 +310,7 @@ export const createSmileyRenderer = async (
     );
     gl.uniform1f(objectUniforms.pressAmountA, primaryPress.amount);
     gl.uniform1f(objectUniforms.pressAmountB, secondaryPress.amount);
+    gl.uniform2f(objectUniforms.bodyOffset, interaction.body.offset.x, interaction.body.offset.y);
     gl.uniform1f(objectUniforms.pinchAmount, pinchAmount);
     gl.uniform2f(objectUniforms.pinchAxis, pinchAxisX, pinchAxisY);
     gl.uniform2f(

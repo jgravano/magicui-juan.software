@@ -32,3 +32,21 @@ These images are visual and physical references, not a pre-rendered animation se
 The first prototype uses image-space WebGL displacement on a dense frontal 2.5D mesh. `01-idle.png` remains the material source, while a clean studio plate and procedural contact shadow let the silhouette deform independently. Two damped springs control local release overshoot and secondary whole-body wobble.
 
 The checkpoint is whether this approach preserves the photographic material while approximating the silhouette, face advection, and volume cues in states 02–08. A full 3D reconstruction remains a fallback, not the default.
+
+## Jelly response tuning
+
+The simulation integrates at a fixed 240 Hz, with a bounded catch-up window after
+stalls. Pointer travel is independent of surface contact, so pulling outside the
+original silhouette encounters progressive resistance rather than a hard stop.
+A secondary spring follows the grip and drives broad body shear; cheeks and face
+lag behind the hand and settle after release. Compression uses reciprocal scale
+compensation to suggest volume preservation in the frontal mesh. This remains a
+2.5D material approximation, not a volumetric soft-body solver.
+
+Pulse speed and whole-body wobble are bounded under repeated gestures. Reduced
+motion suppresses pulses and wobble and increases secondary-mass damping. Lost
+pointer capture and window blur release active contacts.
+
+Run `node tooling/smiley/check-physics.cjs` for refresh-rate equivalence, extended
+drag travel, release overshoot, settling, repeated-gesture stress and reduced
+motion checks.

@@ -100,7 +100,7 @@ export const attachSmileyInput = ({
   };
 
   const handlePointerDown = (event: PointerEvent) => {
-    if (activePointers.has(event.pointerId)) {
+    if (event.button !== 0 || activePointers.has(event.pointerId)) {
       return;
     }
 
@@ -261,6 +261,10 @@ export const attachSmileyInput = ({
   };
 
   const handleBlur = () => {
+    activePointers.forEach(({ slot }) => onPressEnd(slot));
+    activePointers.clear();
+    onHover(null);
+    setCursor(false);
     if (keyboardPressed) {
       keyboardPressed = false;
       onPressEnd(0);
@@ -274,6 +278,8 @@ export const attachSmileyInput = ({
   canvas.addEventListener("pointerup", finishPointer);
   const handlePointerCancel = (event: PointerEvent) => finishPointer(event, true);
   canvas.addEventListener("pointercancel", handlePointerCancel);
+  canvas.addEventListener("lostpointercapture", handlePointerCancel);
+  window.addEventListener("blur", handleBlur);
   canvas.addEventListener("pointerleave", handlePointerLeave);
   canvas.addEventListener("keydown", handleKeyDown);
   canvas.addEventListener("keyup", handleKeyUp);
@@ -285,6 +291,8 @@ export const attachSmileyInput = ({
     canvas.removeEventListener("pointermove", handlePointerMove);
     canvas.removeEventListener("pointerup", finishPointer);
     canvas.removeEventListener("pointercancel", handlePointerCancel);
+    canvas.removeEventListener("lostpointercapture", handlePointerCancel);
+    window.removeEventListener("blur", handleBlur);
     canvas.removeEventListener("pointerleave", handlePointerLeave);
     canvas.removeEventListener("keydown", handleKeyDown);
     canvas.removeEventListener("keyup", handleKeyUp);

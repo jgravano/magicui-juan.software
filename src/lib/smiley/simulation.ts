@@ -1,4 +1,10 @@
 import {
+  BODY_STIFFNESS,
+  BODY_DAMPING,
+  PHYSICS_STEP_SECONDS,
+  MAX_WOBBLE_SPEED,
+  MAX_WOBBLE_AMOUNT,
+  MAX_PULSE_SPEED,
   CONTACT_FOLLOW_SPEED,
   DRAG_FOLLOW_DAMPING,
   DRAG_FOLLOW_STIFFNESS,
@@ -79,6 +85,7 @@ const createPressState = (): SmileyPressState => ({
   velocity: 0,
   contact: { x: 0, y: 0 },
   targetContact: { x: 0, y: 0 },
+  pointer: { x: 0, y: 0 },
   isPressed: false,
   heldSeconds: 0,
   pressureScale: 1,
@@ -88,8 +95,8 @@ const distanceBetweenPresses = (state: SmileyInteractionState) => {
   const [primaryPress, secondaryPress] = state.presses;
 
   return Math.hypot(
-    secondaryPress.targetContact.x - primaryPress.targetContact.x,
-    secondaryPress.targetContact.y - primaryPress.targetContact.y,
+    secondaryPress.pointer.x - primaryPress.pointer.x,
+    secondaryPress.pointer.y - primaryPress.pointer.y,
   );
 };
 
@@ -131,23 +138,29 @@ const updateDragTarget = (state: SmileyInteractionState) => {
 
   if (!state.drag.active) {
     state.drag.active = true;
-    state.drag.anchor.x = activePress.targetContact.x;
-    state.drag.anchor.y = activePress.targetContact.y;
+    state.drag.anchor.x = activePress.pointer.x;
+    state.drag.anchor.y = activePress.pointer.y;
     state.drag.targetOffset.x = 0;
     state.drag.targetOffset.y = 0;
     return;
   }
 
-  const targetOffset = clampVectorLength({
-    x: (activePress.targetContact.x - state.drag.anchor.x) * DRAG_PULL_GAIN,
-    y: (activePress.targetContact.y - state.drag.anchor.y) * DRAG_PULL_GAIN,
-  }, DRAG_MAX_OFFSET);
+  const dx = (activePress.pointer.x - state.drag.anchor.x) * DRAG_PULL_GAIN;
+  const dy = (activePress.pointer.y - state.drag.anchor.y) * DRAG_PULL_GAIN;
+  const distance = Math.hypot(dx, dy);
+  // Progressive resistance: no abrupt stop at the original silhouette.
+  const resistance = distance > 0.00001
+    ? DRAG_MAX_OFFSET * Math.tanh(distance / DRAG_MAX_OFFSET) / distance
+    : 1;
+  const targetOffset = { x: dx * resistance, y: dy * resistance };
 
   state.drag.targetOffset.x = targetOffset.x;
   state.drag.targetOffset.y = targetOffset.y;
 };
 
 export const createSmileyInteractionState = (): SmileyInteractionState => ({
+  accumulator: 0,
+  body: { offset: { x: 0, y: 0 }, velocity: { x: 0, y: 0 } },
   presses: [createPressState(), createPressState()],
   pinch: {
     active: false,
@@ -194,6 +207,7 @@ export const beginSmileyPress = (
   press.pressureScale = pressureScale;
   press.velocity += 2.4 * pressureScale;
   press.targetContact = contact;
+  press.pointer = { ...point };
   state.targetHoverPoint = contact;
   state.hoverTarget = 1;
 
@@ -214,6 +228,7 @@ export const moveSmileyPress = (
   const press = state.presses[slot];
   const contact = clampPointToSphere(point);
   press.targetContact = contact;
+  press.pointer = { ...point };
   state.targetHoverPoint = contact;
   press.pressureScale = pressureScale;
   updatePinchTarget(state);
@@ -253,9 +268,9 @@ export const endSmileyPress = (
     state.pinch.velocity = -Math.sign(pinchReleaseDisplacement) * reboundSpeed;
   }
 
-  state.wobbleVelocity += Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE
+  state.wobbleVelocity = Math.min(MAX_WOBBLE_SPEED, state.wobbleVelocity + Math.max(press.amount, 0.22) * WOBBLE_RELEASE_IMPULSE
     + pinchReleaseAmount * PINCH_RELEASE_WOBBLE_IMPULSE
-    + dragReleaseAmount * DRAG_RELEASE_WOBBLE_IMPULSE;
+    + dragReleaseAmount * DRAG_RELEASE_WOBBLE_IMPULSE);
 };
 
 export const triggerSmileyPulse = (
@@ -263,7 +278,7 @@ export const triggerSmileyPulse = (
   point: Vector2,
 ) => {
   state.pulse.point = clampPointToSphere(point);
-  state.pulse.velocity += PULSE_IMPULSE * (1 - Math.min(Math.abs(state.pulse.amount), 0.5) * 0.35);
+  state.pulse.velocity = Math.min(MAX_PULSE_SPEED, state.pulse.velocity + PULSE_IMPULSE * (1 - Math.min(Math.abs(state.pulse.amount), 0.5) * 0.35));
   state.wobbleVelocity += 0.48;
 };
 
@@ -278,12 +293,11 @@ export const setSmileyHover = (
   }
 };
 
-export const advanceSmileyInteraction = (
+const stepSmileyInteraction = (
   state: SmileyInteractionState,
-  rawDeltaSeconds: number,
+  deltaSeconds: number,
   reduceMotion: boolean,
 ) => {
-  const deltaSeconds = Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
 
   state.presses.forEach((press) => {
     if (press.isPressed) {
@@ -394,6 +408,15 @@ export const advanceSmileyInteraction = (
     state.drag.velocity.y = 0;
   }
 
+  // A slower mass follows the grip. Their difference bends the entire body,
+  // then keeps wobbling after the hand stops or lets go.
+  for (const axis of ["x", "y"] as const) {
+    state.body.velocity[axis] += (state.drag.offset[axis] - state.body.offset[axis])
+      * BODY_STIFFNESS * deltaSeconds;
+    state.body.velocity[axis] *= Math.exp(-BODY_DAMPING * (reduceMotion ? 3 : 1) * deltaSeconds);
+    state.body.offset[axis] += state.body.velocity[axis] * deltaSeconds;
+  }
+
   const shadowTargetX = state.drag.offset.x * SHADOW_DRAG_FOLLOW;
   const shadowTargetY = state.drag.offset.y * SHADOW_DRAG_FOLLOW;
   state.shadow.velocity.x += (
@@ -451,9 +474,26 @@ export const advanceSmileyInteraction = (
   state.wobbleVelocity += -state.wobble * WOBBLE_STIFFNESS * deltaSeconds;
   state.wobbleVelocity *= Math.exp(-WOBBLE_DAMPING * deltaSeconds);
   state.wobble += state.wobbleVelocity * deltaSeconds;
+  if (Math.abs(state.wobble) > MAX_WOBBLE_AMOUNT) {
+    state.wobble = Math.sign(state.wobble) * MAX_WOBBLE_AMOUNT;
+    if (state.wobble * state.wobbleVelocity > 0) state.wobbleVelocity = 0;
+  }
 
   if (Math.abs(state.wobble) < 0.0004 && Math.abs(state.wobbleVelocity) < 0.002) {
     state.wobble = 0;
     state.wobbleVelocity = 0;
+  }
+};
+
+export const advanceSmileyInteraction = (
+  state: SmileyInteractionState,
+  rawDeltaSeconds: number,
+  reduceMotion: boolean,
+) => {
+  if (!Number.isFinite(rawDeltaSeconds) || rawDeltaSeconds <= 0) return;
+  state.accumulator += Math.min(rawDeltaSeconds, MAX_FRAME_DELTA_SECONDS);
+  while (state.accumulator + 1e-10 >= PHYSICS_STEP_SECONDS) {
+    stepSmileyInteraction(state, PHYSICS_STEP_SECONDS, reduceMotion);
+    state.accumulator = Math.max(0, state.accumulator - PHYSICS_STEP_SECONDS);
   }
 };

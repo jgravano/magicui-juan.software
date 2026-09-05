@@ -98,6 +98,7 @@ uniform float uPinchAmount;
 uniform vec2 uPinchAxis;
 uniform vec2 uDragPoint;
 uniform vec2 uDragOffset;
+uniform vec2 uBodyOffset;
 uniform vec2 uPulsePoint;
 uniform float uPulseAmount;
 uniform float uWobble;
@@ -141,13 +142,14 @@ void main() {
   applyPress(position, uPressPointB, pressAmountB);
 
   float compression = max(max(pressAmountA, pressAmountB) - pinchSqueeze * 0.62, 0.0);
-  position.x *= 1.0 + compression * 0.064;
-  position.y *= 1.0 - compression * 0.048;
+  float pressScale = 1.0 - compression * 0.10;
+  position.x /= sqrt(pressScale);
+  position.y *= pressScale;
 
   vec2 pinchAxis = normalize(uPinchAxis);
   vec2 pinchPerpendicular = vec2(-pinchAxis.y, pinchAxis.x);
   float alongScale = 1.0 - pinchSqueeze * 0.21 + pinchStretch * 0.30;
-  float acrossScale = 1.0 + pinchSqueeze * 0.15 - pinchStretch * 0.12;
+  float acrossScale = inversesqrt(alongScale);
   float alongPinch = dot(position, pinchAxis) * alongScale;
   float acrossPinch = dot(position, pinchPerpendicular) * acrossScale;
   position = pinchAxis * alongPinch + pinchPerpendicular * acrossPinch;
@@ -157,7 +159,13 @@ void main() {
   float dragCore = exp(-dot(dragDelta, dragDelta) / 0.34);
   float dragShoulder = exp(-pow((dragDistance - 0.52) / 0.24, 2.0) * 1.35);
   float dragAmount = length(uDragOffset);
-  position += uDragOffset * mix(0.22, 1.0, dragCore);
+  position += uDragOffset * mix(0.24, 1.0, dragCore);
+  vec2 lag = (uBodyOffset - uDragOffset) * mix(1.0, 0.3, uReduceMotion);
+  float gripFalloff = exp(-dot(aPosition - uDragPoint, aPosition - uDragPoint) / 0.65);
+  position += lag * (1.0 - gripFalloff) * 0.48;
+  // Broad shear gives the face and opposite cheek a delayed, jelly-like follow.
+  position.x += lag.x * aPosition.y * 0.16;
+  position.y += lag.y * aPosition.x * 0.16;
   vec2 draggedSurfaceDirection = length(position) > 0.001
     ? normalize(position)
     : vec2(0.0, 1.0);
@@ -171,9 +179,9 @@ void main() {
   position += pulseSurfaceDirection * pulse * (0.034 + pulseCore * 0.046);
 
   float wobble = mix(uWobble, 0.0, uReduceMotion);
-  position.x *= 1.0 + wobble * 0.022;
-  position.y *= 1.0 - wobble * 0.030;
-  position.x += wobble * 0.064 * sin((position.y + 1.0) * 2.25);
+  position.x *= 1.0 + wobble * 0.050;
+  position.y *= 1.0 - wobble * 0.065;
+  position.x += wobble * 0.095 * sin((position.y + 1.0) * 2.25);
   position.y -= wobble * 0.036 * sin((position.x + 0.35) * 2.65);
 
   float idle = mix(sin(uTime * 0.74) * 0.0025, 0.0, uReduceMotion);

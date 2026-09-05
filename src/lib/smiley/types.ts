@@ -18,6 +18,7 @@ export type SmileyPressState = {
   velocity: number;
   contact: Vector2;
   targetContact: Vector2;
+  pointer: Vector2;
   isPressed: boolean;
   heldSeconds: number;
   pressureScale: number;
@@ -51,6 +52,8 @@ export type SmileyShadowState = {
 };
 
 export type SmileyInteractionState = {
+  accumulator: number;
+  body: SmileyShadowState;
   presses: [SmileyPressState, SmileyPressState];
   pinch: SmileyPinchState;
   drag: SmileyDragState;
