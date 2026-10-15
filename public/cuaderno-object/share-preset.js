@@ -17,5 +17,5 @@ export function decodePreset(value){
  }catch{return null;}
 }
 export function presetLink(config,origin){
- const url=new URL('/001',origin);url.hash='preset='+encodePreset(config);return url.href;
+ const base=new URL(origin);if(base.hostname==='studio.juan.software')base.hostname='www.juan.software';const url=new URL('/001',base);url.hash='preset='+encodePreset(config);return url.href;
 }

@@ -1,10 +1,11 @@
 import {createHmac,randomBytes,timingSafeEqual} from 'node:crypto';
-import {cookies} from 'next/headers';
-export const studioOrigin='https://www.juan.software';
+import {cookies,headers} from 'next/headers';
+export async function studioOrigin(){const host=(await headers()).get('host');return host==='studio.juan.software'?'https://studio.juan.software':'https://www.juan.software';}
+export function studioHome(origin:string){return origin==='https://studio.juan.software'?origin:origin+'/studio';}
 export const ownerId=100961009;
 export const sessionCookie='studio_session';
 export const flowCookie='studio_oauth';
-export const cookieOptions={httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax' as const,path:'/studio'};
+export const cookieOptions={httpOnly:true,secure:process.env.NODE_ENV==='production',sameSite:'lax' as const,path:'/'};
 export function configured(){return Boolean(process.env.STUDIO_GITHUB_CLIENT_ID&&process.env.STUDIO_GITHUB_CLIENT_SECRET&&process.env.STUDIO_SESSION_SECRET);}
 export function randomToken(){return randomBytes(32).toString('base64url');}
 export function sign(data:object){const secret=process.env.STUDIO_SESSION_SECRET;if(!secret)throw Error('Studio authentication is not configured');const body=Buffer.from(JSON.stringify(data)).toString('base64url');return body+'.'+createHmac('sha256',secret).update(body).digest('base64url');}
