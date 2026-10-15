@@ -1,0 +1,40 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {createRequire} from 'node:module';
+import vm from 'node:vm';
+import ts from 'typescript';
+import * as presets from '../public/cuaderno-object/share-preset.js';
+import * as model from '../public/cuaderno-object/builder-model.js';
+const require=createRequire(import.meta.url),exports={};
+const code=ts.transpileModule(readFileSync(new URL('../src/lib/studio/library.ts',import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022}}).outputText;
+vm.runInNewContext(code,{exports,structuredClone,Date,require(name){if(name.endsWith('share-preset.js'))return presets;if(name.endsWith('builder-model.js'))return model;return require(name);}});
+const {initialLibrary,mutateLibrary,snapshot}=exports;
+const alternate=presets.encodePreset({...model.defaults,color:'#aaff22'});
+test('drafts and saved versions never alter the published product',()=>{
+ const initial=initialLibrary();const draft=mutateLibrary(initial,{type:'draft',projectId:'001',preset:alternate});
+ assert.equal(initial.projects[0].draft.preset,initial.published.preset);
+ assert.equal(draft.published.preset,initial.published.preset);
+ const saved=mutateLibrary(draft,{type:'version',projectId:'001',preset:alternate,name:'Lima'});
+ assert.equal(saved.published.preset,initial.published.preset);
+ assert.equal(saved.projects[0].versions[0].name,'Lima');
+ const published=mutateLibrary(saved,{type:'publish',projectId:'001',versionId:saved.projects[0].versions[0].id});
+ assert.equal(published.published.preset,alternate);
+ const reverted=mutateLibrary(published,{type:'publish',projectId:'001',versionId:'original'});
+ assert.equal(reverted.published.preset,initial.published.preset);
+});
+test('restoring preserves unsaved exploration as a version',()=>{
+ const draft=mutateLibrary(initialLibrary(),{type:'draft',projectId:'001',preset:alternate});
+ const restored=mutateLibrary(draft,{type:'restore',projectId:'001',versionId:'original'});
+ assert.equal(restored.projects[0].versions[0].preset,alternate);
+ assert.equal(restored.projects[0].draft.preset,restored.published.preset);
+});
+test('projects are independent and invalid data cannot be published',()=>{
+ const initial=initialLibrary();const created=mutateLibrary(initial,{type:'create',name:'Estudio B',preset:alternate});
+ assert.equal(created.projects.length,2);assert.equal(created.projects[1].id,'001');
+ assert.equal(created.published.projectId,'001');
+ assert.throws(()=>mutateLibrary(created,{type:'publish',projectId:created.projects[0].id,versionId:'original'}));
+ assert.throws(()=>mutateLibrary(initial,{type:'draft',projectId:'001',preset:'bad'}));
+ assert.throws(()=>mutateLibrary(initial,{type:'publish',projectId:'missing',versionId:'original'}));
+ assert.equal(snapshot({preset:alternate,thumbnail:'data:image/svg+xml,<script>'}).thumbnail,'');
+});

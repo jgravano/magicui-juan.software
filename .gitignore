@@ -13,3 +13,5 @@ pnpm-debug.log*
 .env.*.local
 *.tsbuildinfo
 data/lupa/raw
+
+.studio-data/
