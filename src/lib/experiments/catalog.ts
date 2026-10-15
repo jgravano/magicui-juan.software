@@ -12,6 +12,7 @@ export type ExperimentEntry = {
 };
 
 export const experimentsCatalog: ExperimentEntry[] = [
+  { slug: "001", title: "001", description: "Un cuaderno para explorar materiales, luz y movimiento.", order: 29, landing: { href: "/001", className: "project--001", image: "/objects/001-type.svg" } },
   {
     slug: "resonance",
     title: "Resonance",
