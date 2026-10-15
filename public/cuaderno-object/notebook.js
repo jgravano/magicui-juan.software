@@ -122,6 +122,17 @@ ${slider('printSize','Tamaño',12,180,1)}${slider('printSpacing','Interlineado',
 <details><summary>Estudio<span>06</span></summary><div class="section-body">${slider('azimuth','Dirección de luz',0,360,1)}${slider('elevation','Altura de luz',20,85,1)}${slider('intensity','Intensidad',.3,5,.05)}<button id="reset-view">Restablecer vista</button></div></details></div>
 <footer><button id="reset-work" title="Volver al diseño WORK del brief">Restablecer WORK</button><button id="open-cover">Abrir cuaderno</button><button id="clasp-action">Desenganchar elástico</button><p id="clasp-status" aria-live="polite"></p><p>Arrastrá el fondo para rotar · scroll para zoom</p></footer>`;
 document.body.append(builder);$('printText').value=config.printText;$('printCaption').value=config.printCaption;$('view-print').onclick=()=>{if(active)return;coverGoal=0;rotationGoal=-.075;tiltGoal=1.04;zoom=1;ui();};
+const mobilePanelQuery=matchMedia('(max-width:740px)');
+const panelSections=[...builder.querySelectorAll('details')];
+const panelTabs=document.createElement('nav');panelTabs.className='mobile-sections';panelTabs.setAttribute('aria-label','Partes del cuaderno');
+let selectedPanel=0;
+function selectPanel(index){selectedPanel=index;panelSections.forEach((section,i)=>{section.dataset.mobileActive=String(i===index);if(mobilePanelQuery.matches)section.open=i===index;panelTabs.children[i]?.setAttribute('aria-pressed',String(i===index));});builder.querySelector('.panel-scroll').scrollTop=0;}
+panelSections.forEach((section,index)=>{const button=document.createElement('button');button.type='button';button.textContent=section.querySelector('summary').childNodes[0].textContent.trim();button.onclick=()=>selectPanel(index);panelTabs.append(button);});
+builder.querySelector('header').after(panelTabs);
+const panelToggle=document.createElement('button');panelToggle.className='mobile-panel-toggle';panelToggle.type='button';panelToggle.textContent='Ocultar';panelToggle.setAttribute('aria-expanded','true');panelToggle.setAttribute('aria-controls','mobile-controls');builder.querySelector('.panel-scroll').id='mobile-controls';
+panelToggle.onclick=()=>{const collapsed=document.body.classList.toggle('panel-collapsed');panelToggle.textContent=collapsed?'Ajustar':'Ocultar';panelToggle.setAttribute('aria-expanded',String(!collapsed));resize();};builder.querySelector('header').append(panelToggle);
+mobilePanelQuery.addEventListener('change',()=>{document.body.classList.remove('panel-collapsed');panelToggle.textContent='Ocultar';panelToggle.setAttribute('aria-expanded','true');selectPanel(selectedPanel);resize();});selectPanel(0);
+new ResizeObserver(resize).observe(canvas);
 function openBuilder(){builder.hidden=false;}
 function closeBuilder(){canvas.focus({preventScroll:true});}
 canvas.addEventListener('contextmenu',e=>{e.preventDefault();});
