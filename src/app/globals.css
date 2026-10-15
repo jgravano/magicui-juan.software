@@ -636,12 +636,12 @@ a:focus-visible {
   }
 }
 
-.project--001 { --base-rotate: -9deg; left: 24%; bottom: -17%; width: 27%; z-index: 7; }
+.project--001 { --base-rotate: 6deg; right: 3%; top: -16%; width: 23%; z-index: 7; }
 .project--001 .project-tag { background: #ff742e; right: -4%; top: 12%; }
 .project--001 .project-hitbox { inset: 8% 12% 8% 10%; }
 
 .project--001 .project-tag { display: none; }
 .project--001 .project-object { transition: transform 180ms ease; }
-.project--001:hover .project-object, .project--001:focus-visible .project-object { transform: rotate(-3deg) translateY(-5px); }
+.project--001:hover .project-object, .project--001:focus-visible .project-object { transform: rotate(1deg) translateY(-5px); }
 .project--001:focus-visible .project-hitbox { outline: 2px solid #ff742e; outline-offset: 6px; }
 @media (prefers-reduced-motion: reduce) { .project--001 .project-object { transition: none; } }
