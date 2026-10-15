@@ -46,3 +46,7 @@ canvas.over-band{cursor:grab}canvas.dragging-band{cursor:grabbing}
  .panel-collapsed #builder header{height:65px;padding:12px 18px}
  .panel-collapsed .mobile-sections,.panel-collapsed .panel-scroll,.panel-collapsed footer{display:none}
 }
+
+#share-preset{margin-bottom:8px}#share-status{font-size:11px;margin:0 0 8px;color:#626d52}#share-status:empty{display:none}#share-link[hidden]{display:none}#share-link{margin-bottom:10px;font-size:12px} @media(max-width:740px){#share-preset{margin:0;flex-basis:100%;min-height:36px}#share-status{display:block;width:100%;text-align:center;margin:0}#share-status:empty{display:none}#share-link{font-size:16px} }
+
+@media(max-width:740px){footer #share-preset,footer #reset-work{order:3;flex:1;min-height:32px;width:auto;flex-basis:40%;margin:0}footer #share-status,footer #share-link{order:4}}

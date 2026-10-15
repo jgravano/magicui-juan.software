@@ -1,9 +1,11 @@
+import {decodePreset,presetLink} from './share-preset.js';
 import {pinchZoom,bandProfile} from './interaction-math.js';
 import * as THREE from './vendor/three.module.min.js';
 import {spring,releaseTarget,stripPositions,WIDTH,HEIGHT} from './paper-physics.js';
 import {canOpenCover,canFastenElastic,elasticDropTarget} from './elastic-clasp.js';
 import {defaults,normalize,dimensions} from './builder-model.js';
 let config={...defaults};try{config=normalize({...defaults,...JSON.parse(localStorage.getItem('taco-builder-work-v2')||'{}')});}catch{}
+let sharedPreset=null;try{sharedPreset=decodePreset(new URLSearchParams(window.parent.location.hash.slice(1)).get('preset'));}catch{}if(sharedPreset)config=sharedPreset;
 let dims=dimensions(config);
 let bandDrag=null,pullX=0,pullXV=0,pullY=0,pullYV=0,pullLift=0,pullLiftV=0,grabT=.5;
 let band=0,bandGoal=0,bandV=0,tilt=1.04,tiltGoal=1.04,tiltV=0,zoom=1,rotateDownY=0,tiltStart=1.04;
@@ -129,7 +131,7 @@ ${slider('printSize','Tamaño',12,180,1)}${slider('printSpacing','Interlineado',
 <details><summary>Papel<span>04</span></summary><div class="section-body">${color('paper','Tono')}${slider('pages','Páginas',32,240,16)}${select('paperStyle','Interior',[['plain','Liso'],['dots','Punteado']])}${slider('paperTexture','Textura',0,1,.01)}</div></details>
 <details><summary>Elástico<span>05</span></summary><div class="section-body"><label><span>Incluir elástico</span><input id="bandVisible" data-key="bandVisible" type="checkbox" ${config.bandVisible?'checked':''}></label>${color('accent','Color de la banda')}${slider('bandWidth','Ancho',.04,.16,.005)}<p class="note">Agarrá la banda y pasala por el borde. Si la soltás antes, vuelve a su lugar.</p><button id="elastic">Soltar / colocar</button></div></details>
 <details><summary>Estudio<span>06</span></summary><div class="section-body">${slider('azimuth','Dirección de luz',0,360,1)}${slider('elevation','Altura de luz',20,85,1)}${slider('intensity','Intensidad',.3,5,.05)}<button id="reset-view">Restablecer vista</button></div></details></div>
-<footer><button id="reset-work" title="Volver al diseño WORK del brief">Restablecer WORK</button><button id="open-cover">Abrir cuaderno</button><button id="clasp-action">Desenganchar elástico</button><p id="clasp-status" aria-live="polite"></p><p>Arrastrá el fondo para rotar · scroll para zoom</p></footer>`;
+<footer><button id="share-preset">Copiar link</button><p id="share-status" role="status" aria-live="polite"></p><input id="share-link" type="text" readonly aria-label="Link del cuaderno" hidden><button id="reset-work" title="Volver al diseño WORK del brief">Restablecer WORK</button><button id="open-cover">Abrir cuaderno</button><button id="clasp-action">Desenganchar elástico</button><p id="clasp-status" aria-live="polite"></p><p>Arrastrá el fondo para rotar · scroll para zoom</p></footer>`;
 document.body.append(builder);$('printText').value=config.printText;$('printCaption').value=config.printCaption;$('view-print').onclick=()=>{closeNotebook();rotationGoal=-.075;tiltGoal=1.04;zoom=1;ui();};
 const mobilePanelQuery=matchMedia('(max-width:740px)');
 const panelSections=[...builder.querySelectorAll('details')];
@@ -142,6 +144,11 @@ const panelToggle=document.createElement('button');panelToggle.className='mobile
 panelToggle.onclick=()=>{const collapsed=document.body.classList.toggle('panel-collapsed');panelToggle.textContent=collapsed?'Ajustar':'Ocultar';panelToggle.setAttribute('aria-expanded',String(!collapsed));resize();};builder.querySelector('header').append(panelToggle);
 mobilePanelQuery.addEventListener('change',()=>{document.body.classList.remove('panel-collapsed');panelToggle.textContent='Ocultar';panelToggle.setAttribute('aria-expanded','true');selectPanel(selectedPanel);resize();});selectPanel(0);
 new ResizeObserver(resize).observe(canvas);
+$('share-preset').onclick=async()=>{
+ const link=presetLink(config,location.origin);$('share-link').hidden=true;
+ try{await navigator.clipboard.writeText(link);$('share-status').textContent='Link copiado';}
+ catch{$('share-link').value=link;$('share-link').hidden=false;$('share-link').focus();$('share-link').select();$('share-status').textContent='Copiá este link para compartir tu cuaderno.';}
+};
 function openBuilder(){builder.hidden=false;}
 function closeBuilder(){canvas.focus({preventScroll:true});}
 canvas.addEventListener('contextmenu',e=>{e.preventDefault();});
