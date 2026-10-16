@@ -15,7 +15,7 @@
 
 - `src/components/studio/StudioWorkspace.tsx`: library, workspace, recovery, version history and publish interaction.
 - `src/lib/studio/library.ts`: pure state transitions and input validation; no access to storage.
-- `src/lib/studio/storage.ts`: private Blob store, consistent reads and ETag conditional writes. Locally, development uses ignored `.studio-data/library.json` with serialized atomic writes. Production never falls back to ephemeral filesystem persistence.
+- `src/lib/studio/storage.ts`: private Blob store, consistent reads and ETag conditional writes. Reads explicitly request identity encoding: compressed Blob responses carry weak ETags that would reject every conditional overwrite. Locally, development uses ignored `.studio-data/library.json` with serialized atomic writes. Production never falls back to ephemeral filesystem persistence.
 - `/studio/api/library`: authenticated reads, authenticated same-origin writes, revision checking for legacy clients, automatic conflict recovery for current clients and explicit failure responses.
 - `/api/experiments/001`: only the published encoded preset, never drafts or library metadata. Server cache is invalidated after publication; on storage outage, the built-in original remains available.
 - `public/cuaderno-object/notebook.js`: physics and rendering remain imperative. An origin/source-checked postMessage bridge transfers only design snapshots between the shell and authenticated iframe. Existing standalone public preset links still work.

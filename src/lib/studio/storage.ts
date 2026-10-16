@@ -7,7 +7,9 @@ const localFile=join(process.cwd(),'.studio-data/library.json');
 const cloud=()=>Boolean(process.env.BLOB_STORE_ID||process.env.BLOB_READ_WRITE_TOKEN);
 export async function readLibrary():Promise<{library:Library;etag?:string}>{
  if(cloud()){
-  const result=await get(path,{access:'private',useCache:false});
+  // Compressed responses carry a weak W/ ETag, which cannot match a conditional write.
+  // Request the original representation so the validator belongs to the body we read.
+  const result=await get(path,{access:'private',useCache:false,headers:{'Accept-Encoding':'identity'}});
   if(!result)return {library:initialLibrary()};
   return {library:await new Response(result.stream).json(),etag:result.blob.etag};
  }

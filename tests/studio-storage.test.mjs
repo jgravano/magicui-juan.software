@@ -11,7 +11,7 @@ function compile(path,mocks={}){const exports={};const source=ts.transpileModule
 const library=compile('src/lib/studio/library.ts',{'../../../public/cuaderno-object/share-preset.js':presets,'../../../public/cuaderno-object/builder-model.js':model});
 let blob=null,etag=0;
 class BlobPreconditionFailedError extends Error{}
-const storage=compile('src/lib/studio/storage.ts',{'./library':library,'@vercel/blob':{BlobPreconditionFailedError,async get(){if(!blob)return null;return {stream:new Response(JSON.stringify(blob)).body,blob:{etag:String(etag)}};},async put(path,body,options){await new Promise(r=>setTimeout(r,5));if((options.ifMatch&&options.ifMatch!==String(etag))||(!options.allowOverwrite&&blob))throw new BlobPreconditionFailedError();blob=JSON.parse(body);etag++;}}});
+const storage=compile('src/lib/studio/storage.ts',{'./library':library,'@vercel/blob':{BlobPreconditionFailedError,async get(path,options){if(!blob)return null;const validator=`"${etag}"`;return {stream:new Response(JSON.stringify(blob)).body,blob:{etag:options.headers?.['Accept-Encoding']==='identity'?validator:`W/${validator}`}};},async put(path,body,options){await new Promise(r=>setTimeout(r,5));if((options.ifMatch&&options.ifMatch!==`"${etag}"`)||(!options.allowOverwrite&&blob))throw new BlobPreconditionFailedError();blob=JSON.parse(body);etag++;}}});
 test('two devices cannot overwrite each other, including first save',async()=>{
  const preset=presets.encodePreset(model.defaults);
  const concurrent=await Promise.allSettled([storage.writeLibrary({type:'draft',projectId:'001',preset},0),storage.writeLibrary({type:'rename',projectId:'001',name:'Other tab'},0)]);
@@ -51,4 +51,14 @@ test('new clients rebase simultaneous saves, preserve both drafts and deduplicat
  assert.equal(retried.projects[0].versions.length,saved.projects[0].versions.length);
  const published=await storage.writeLibrary({type:'publish',projectId:'001',versionId:saved.projects[0].versions[0].id,requestId:'44444444-4444-4444-8444-444444444444'},0);
  assert.equal(published.published.preset,green);
+});
+
+test('reads use strong validators for repeated conditional overwrites',async()=>{
+ blob=library.initialLibrary();etag=20;
+ const read=await storage.readLibrary();
+ assert.equal(read.etag,'"20"');
+ const first=await storage.writeLibrary({type:'rename',projectId:'001',name:'First save'},0);
+ const second=await storage.writeLibrary({type:'rename',projectId:'001',name:'Second save'},first.revision);
+ assert.equal(second.revision,2);
+ assert.equal((await storage.readLibrary()).library.projects[0].name,'Second save');
 });
