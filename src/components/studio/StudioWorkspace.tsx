@@ -32,16 +32,16 @@ export default function StudioWorkspace(){
  const [preview,setPreview]=useState(false),[history,setHistory]=useState(false),[viewVersion,setViewVersion]=useState<Version|null>(null);
  const [dialog,setDialog]=useState<DialogState|null>(null),[busy,setBusy]=useState(false),[status,setStatus]=useState('Conectando con tu taller…'),[error,setError]=useState('');
  const [recovery,setRecovery]=useState<Snapshot|null>(null),[ready,setReady]=useState(false),[frameKey,setFrameKey]=useState(0);
- const iframe=useRef<HTMLIFrameElement>(null),snapshotRef=useRef<Snapshot|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null),queue=useRef<Promise<unknown>>(Promise.resolve()),dirty=useRef(false),blocked=useRef(false);
+ const iframe=useRef<HTMLIFrameElement>(null),snapshotRef=useRef<Snapshot|null>(null),timer=useRef<ReturnType<typeof setTimeout>|null>(null),queue=useRef<Promise<unknown>>(Promise.resolve()),dirty=useRef(false);
  const project=library?.projects.find(p=>p.id===active)||null;
  const setData=useCallback((data:Library)=>{libraryRef.current=data;setLibrary(data);},[]);
  useEffect(()=>{fetch('/studio/api/library',{cache:'no-store'}).then(async response=>{const data=await response.json();if(!response.ok)throw Error(data.error);setData(data);setStatus('Todo en su lugar');const selected=data.projects.find((p:Project)=>p.id===new URLSearchParams(location.search).get('project'));if(selected)await openProject(selected);}).catch(e=>setError(e.message));},[setData]);
  const mutate=useCallback((action:Action):Promise<Library>=>{
   const operation=queue.current.then(async()=>{
-   if(blocked.current)throw Error('Recargá para sincronizar los cambios de otro dispositivo.');
-   const response=await fetch('/studio/api/library',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:libraryRef.current?.revision,action})});
+   const intent={...action,requestId:crypto.randomUUID(),baseDraft:libraryRef.current?.projects.find(p=>p.id===action.projectId)?.draft.preset};
+   const response=await fetch('/studio/api/library',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({revision:libraryRef.current?.revision,action:intent})});
    const data=await response.json();
-   if(!response.ok){if(response.status===409)blocked.current=true;throw Error(data.error||'No se pudo guardar.');}
+   if(!response.ok)throw Error(data.error||'No se pudo guardar.');
    setData(data);return data as Library;
   });
   queue.current=operation.catch(()=>{});return operation;
@@ -53,7 +53,7 @@ export default function StudioWorkspace(){
    return data;
   }catch(e){setError((e as Error).message);setStatus('Guardado solo en este dispositivo');throw e;}
  },[mutate]);
- const flush=useCallback(async()=>{if(timer.current)clearTimeout(timer.current);if(dirty.current&&activeRef.current&&snapshotRef.current)await saveDraft(activeRef.current,snapshotRef.current);await queue.current;},[saveDraft]);
+ const flush=useCallback(async()=>{if(timer.current)clearTimeout(timer.current);await queue.current;if(dirty.current&&activeRef.current&&snapshotRef.current)await saveDraft(activeRef.current,snapshotRef.current);await queue.current;},[saveDraft]);
  function send(message:object){iframe.current?.contentWindow?.postMessage({source:'juan-studio',...message},location.origin);}
  useEffect(()=>{
   const message=(event:MessageEvent)=>{

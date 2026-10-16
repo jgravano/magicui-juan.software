@@ -5,7 +5,7 @@
 ## Workflow
 
 - The library contains notebook projects, each with an independent draft and immutable named versions.
-- Editing autosaves the draft after inactivity. A local recovery copy survives interrupted writes. The editor reports whether a save reached the server; it never silently replaces newer data from another tab/device.
+- Editing autosaves the draft after inactivity. A local recovery copy survives interrupted writes. The editor reports whether a save reached the server. Writes rebase onto the latest library; when drafts diverge, the other draft is preserved as a version before saving. Request IDs deduplicate retried operations.
 - A version is a checkpoint of design settings (materials, dimensions, print and lighting), with a small rendered thumbnail. Physical pose and handwritten strokes are not part of the design snapshot. Handwriting is disabled in managed Studio mode.
 - Previewing a saved version does not replace the draft. Restore copies the version into the draft; an uncheckpointed draft is first preserved as “Antes de restaurar”.
 - Publishing chooses an immutable version for `/001`, with an explicit preview dialog naming the replacement. It does not publish the moving draft. Older versions can be republished.
@@ -16,7 +16,7 @@
 - `src/components/studio/StudioWorkspace.tsx`: library, workspace, recovery, version history and publish interaction.
 - `src/lib/studio/library.ts`: pure state transitions and input validation; no access to storage.
 - `src/lib/studio/storage.ts`: private Blob store, consistent reads and ETag conditional writes. Locally, development uses ignored `.studio-data/library.json` with serialized atomic writes. Production never falls back to ephemeral filesystem persistence.
-- `/studio/api/library`: authenticated reads, authenticated same-origin writes, revision checking and explicit failure responses.
+- `/studio/api/library`: authenticated reads, authenticated same-origin writes, revision checking for legacy clients, automatic conflict recovery for current clients and explicit failure responses.
 - `/api/experiments/001`: only the published encoded preset, never drafts or library metadata. Server cache is invalidated after publication; on storage outage, the built-in original remains available.
 - `public/cuaderno-object/notebook.js`: physics and rendering remain imperative. An origin/source-checked postMessage bridge transfers only design snapshots between the shell and authenticated iframe. Existing standalone public preset links still work.
 

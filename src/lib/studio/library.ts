@@ -6,8 +6,8 @@ export type Snapshot={preset:string;thumbnail:string};
 export type Version=Snapshot&{id:string;name:string;createdAt:string};
 export type Project={id:string;name:string;updatedAt:string;draft:Snapshot;versions:Version[]};
 export type Publication={projectId:string;versionId:string;preset:string;at:string};
-export type Library={schema:1;revision:number;projects:Project[];published:Publication};
-export type Action={type:'draft'|'version'|'create'|'rename'|'restore'|'publish';projectId?:string;versionId?:string;name?:string;preset?:string;thumbnail?:string};
+export type Library={schema:1;revision:number;projects:Project[];published:Publication;operations?:string[]};
+export type Action={type:'draft'|'version'|'create'|'rename'|'restore'|'publish';projectId?:string;versionId?:string;name?:string;preset?:string;thumbnail?:string;requestId?:string;baseDraft?:string};
 export class LibraryError extends Error {constructor(message:string,public status=400){super(message);}}
 const cleanName=(v:unknown,fallback:string)=>typeof v==='string'&&v.trim()?v.trim().slice(0,80):fallback;
 export function snapshot(input:Partial<Snapshot>):Snapshot {
@@ -53,4 +53,17 @@ export function mutateLibrary(current:Library,action:Action,now=new Date().toISO
   project.updatedAt=now;
  }
  library.revision++;return library;
+}
+
+// Rebase a user's intent onto the latest library without discarding another draft.
+export function rebaseLibrary(current:Library,action:Action):Library {
+ const library=structuredClone(current);
+ const project=library.projects.find(p=>p.id===action.projectId);
+ if(project&&['draft','version','restore'].includes(action.type)&&typeof action.baseDraft==='string'&&project.draft.preset!==action.baseDraft&&project.draft.preset!==action.preset&&!project.versions.some(v=>v.preset===project.draft.preset)){
+  if(project.versions.length>=100)throw new LibraryError('No hay espacio para preservar ambas versiones. Tu borrador local sigue disponible.');
+  project.versions.unshift({...project.draft,id:randomUUID(),name:'Respaldo de otra sesión',createdAt:new Date().toISOString()});
+ }
+ const next=mutateLibrary(library,action);
+ if(action.requestId)next.operations=[...(current.operations||[]),action.requestId].slice(-64);
+ return next;
 }

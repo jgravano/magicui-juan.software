@@ -31,3 +31,24 @@ test('library is private and mutations reject cross-origin requests',async()=>{
  assert.equal((await route.POST(request('https://studio.juan.software'))).status,200);assert.equal(writes,1);
  assert.match((await route.GET()).headers.get('cache-control'),/private, no-store/);
 });
+test('new clients rebase simultaneous saves, preserve both drafts and deduplicate retries',async()=>{
+ blob=library.initialLibrary();etag=10;
+ const base=blob.projects[0].draft.preset;
+ const red=presets.encodePreset({...model.defaults,color:'#ff0000'}),green=presets.encodePreset({...model.defaults,color:'#00ff00'});
+ const first={type:'draft',projectId:'001',preset:red,baseDraft:base,requestId:'11111111-1111-4111-8111-111111111111'};
+ const second={type:'draft',projectId:'001',preset:green,baseDraft:base,requestId:'22222222-2222-4222-8222-222222222222'};
+ const results=await Promise.all([storage.writeLibrary(first,0),storage.writeLibrary(second,0)]);
+ assert.equal(results.length,2);
+ const current=(await storage.readLibrary()).library;
+ assert.equal(current.revision,2);
+ assert.equal(current.projects[0].draft.preset,green);
+ assert.ok(current.projects[0].versions.some(v=>v.preset===red));
+ assert.equal(current.published.preset,base);
+ const version={type:'version',projectId:'001',preset:green,baseDraft:green,name:'Lista para publicar',requestId:'33333333-3333-4333-8333-333333333333'};
+ const saved=await storage.writeLibrary(version,0);
+ const retried=await storage.writeLibrary(version,0);
+ assert.equal(retried.revision,saved.revision);
+ assert.equal(retried.projects[0].versions.length,saved.projects[0].versions.length);
+ const published=await storage.writeLibrary({type:'publish',projectId:'001',versionId:saved.projects[0].versions[0].id,requestId:'44444444-4444-4444-8444-444444444444'},0);
+ assert.equal(published.published.preset,green);
+});
