@@ -645,3 +645,75 @@ a:focus-visible {
 .project--001:hover .project-object, .project--001:focus-visible .project-object { transform: rotate(1deg) translateY(-5px); }
 .project--001:focus-visible .project-hitbox { outline: 2px solid #ff742e; outline-offset: 6px; }
 @media (prefers-reduced-motion: reduce) { .project--001 .project-object { transition: none; } }
+
+.not-found-scene {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  color: #e5e6e8;
+  background: #08090b;
+  font-family: Helvetica, Arial, sans-serif;
+}
+
+.not-found-scene canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.not-found-copy {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 1;
+  width: min(21rem, 64vw);
+  text-align: center;
+  opacity: 0;
+  will-change: left, top, transform;
+  animation: not-found-appear 1.4s 0.35s ease forwards;
+}
+
+.not-found-copy h1 {
+  margin: 0 0 17px;
+  font-size: clamp(1rem, 1.55vw, 1.3rem);
+  font-weight: 400;
+  line-height: 1.18;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+.not-found-copy a {
+  border-bottom: 1px solid rgba(229, 230, 232, 0.28);
+  padding-bottom: 5px;
+  color: rgba(229, 230, 232, 0.68);
+  font-size: 0.78rem;
+  transition: color 0.25s, border-color 0.25s;
+}
+
+.not-found-copy a:hover,
+.not-found-copy a:focus-visible {
+  border-color: #e5e6e8;
+  color: #e5e6e8;
+}
+
+@keyframes not-found-appear {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 640px) {
+  .not-found-copy {
+    width: min(17rem, 62vw);
+  }
+
+  .not-found-copy h1 {
+    font-size: 0.94rem;
+  }
+
+  .not-found-copy a {
+    font-size: 0.72rem;
+  }
+}
