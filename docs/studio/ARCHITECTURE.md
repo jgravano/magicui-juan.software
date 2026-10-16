@@ -1,6 +1,6 @@
 # Studio
 
-`studio.juan.software` serves the authenticated workspace. `/studio` remains compatible. GitHub identity 100961009 is the only authorized owner. The private canvas and library API both verify the signed, HttpOnly session independently.
+`studio.juan.software` serves the authenticated workspace. `/studio` and every nested Studio route return 404 on all other production hosts. Local development still allows localhost. GitHub identity 100961009 is the only authorized owner. The private canvas and library API both verify the signed, HttpOnly session independently.
 
 ## Workflow
 
