@@ -29,3 +29,13 @@ The Vercel project is connected to private Blob store `juan-studio` (`store_xCNk
 `node --test tests/studio-*.test.mjs tests/notebook-share.test.mjs tests/notebook-interactions.test.mjs`
 
 Tests cover publication isolation, restoration backups, independent projects, invalid presets, concurrent initial and subsequent writes, owner-only access and cross-origin rejection. The production build checks TypeScript. Browser QA covers editing, saving, preview, restoring, publishing locally, creating a project and reloading it, plus desktop/iPad portrait/iPad landscape/mobile layouts. Actual iPad touch hardware remains a separate check.
+
+## Product design tools
+
+The inspector selects one component at a time. The format is in millimetres (50 mm per scene unit); paper physics, covers, paper block, binding and elastic adapt to its dimensions. The perforation layout is shared by the paper textures, paper block, covers and binding. Manual inset changes the binding width to keep the cover crossing aligned. Close hole spacing is flagged as a design warning, not manufacturing validation.
+
+`design-tools.js` owns format presets, locked-ratio resizing, hole layout and the generated editable design prompt. Dimension overlays and front view are workspace tools, never public UI or stored design changes. The prompt uses current configuration and can be edited/copied locally; no generation service is contacted.
+
+Preset v2 appends the design fields; v1 links and stored versions still decode with default dimensions. Existing published state is not rewritten by deploying the editor. New settings participate in drafts, versions, preview, share links and explicit publication.
+
+Tasks are tracked in GitHub Issues; see [BACKLOG.md](BACKLOG.md). Manufacturing specifications and supplier management are deferred in #9. Further design work is listed in #10.

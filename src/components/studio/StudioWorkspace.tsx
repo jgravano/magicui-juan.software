@@ -111,6 +111,7 @@ export default function StudioWorkspace(){
    <button className="st-wordmark" onClick={home} aria-label="Studio — volver a proyectos">studio<span className="st-mark">*</span></button>
    {project?<><span className="st-divider"/><button className="st-project-title" onClick={()=>setDialog({kind:'rename'})}>{project.name}<span>↗</span></button><span className="st-draft-label">{viewVersion?viewVersion.name:'Borrador'}</span></>:<span className="st-private">UN ESPACIO DE JUAN</span>}
    <nav className="st-top-actions" aria-label="Acciones del taller">
+    {!project&&<a href="https://github.com/jgravano/magicui-juan.software/issues" target="_blank" rel="noreferrer">Tareas ↗</a>}
     {project?<><button className={history?'is-selected':''} aria-pressed={history} onClick={()=>setHistory(!history)}>Versiones <span className="st-count">{project.versions.length}</span></button><button onClick={togglePreview} aria-pressed={preview}>{preview?'Volver a editar':'Vista previa'}</button><button className="st-primary" disabled={!ready||busy||Boolean(viewVersion)} onClick={()=>setDialog({kind:'version'})}>Guardar versión</button></>:<><a href="https://www.juan.software" target="_blank" rel="noreferrer">juan.software ↗</a><form action="/studio/logout" method="post"><button title="Salir de tu cuenta">Salir</button></form></>}
    </nav>
   </header>

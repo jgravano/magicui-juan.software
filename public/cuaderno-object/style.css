@@ -76,3 +76,29 @@ html[data-managed=true] footer #clasp-status{font-size:10px;margin:0}
 @media(max-width:740px),(max-width:1000px) and (orientation:portrait){html[data-managed=true][data-mode=studio] canvas{width:100%}html[data-managed=true] #builder{width:100%}html[data-managed=true] #builder header{padding:12px 18px 8px}html[data-managed=true] #builder h1{font:18px Georgia,serif;margin:0}html[data-managed=true] footer{display:flex;flex-wrap:wrap;padding:10px 18px;gap:8px}html[data-managed=true] footer button{flex:1}html[data-managed=true] #clasp-action{margin:0}html[data-managed=true] #builder .eyebrow{display:none}}
 
 @media(min-width:741px) and (max-width:1000px) and (orientation:portrait){body{--panel-height:38dvh}#builder .panel-scroll{padding-left:24px;padding-right:24px}.section-body{display:grid;grid-template-columns:1fr 1fr;gap:0 30px}.section-body>.note,.section-body>.text-label{grid-column:1/-1}html[data-managed=true] footer{padding:12px 24px}html[data-mode=view] canvas{height:100%;width:100%}}
+
+/* Product design inspector: one part at a time, with physical dimensions. */
+.mobile-sections{display:flex;flex-wrap:wrap;gap:5px;padding:0 20px 18px;flex-shrink:0}
+.mobile-sections button{font:11px inherit;min-height:32px!important;border-radius:18px!important;padding:6px 11px}
+.mobile-sections button[aria-pressed=true]{background:#30372d;color:#fff;border-color:#30372d}
+.panel-scroll details:not([data-mobile-active=true]){display:none}
+.panel-scroll summary{display:none}
+.section-intro{font:italic 17px/1.4 Georgia,serif;color:#64695b;margin:8px 0 22px}
+.format-options{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-bottom:20px}
+.format-options button{text-align:left;padding:12px!important;font-size:13px;line-height:1.5}
+.format-options small{display:block;font:10px monospace;opacity:.6;margin-top:4px}
+.format-options button[aria-pressed=true]{border-color:#81886e;background:#e8eadd}
+.unit-input{display:flex;align-items:center;border:1px solid #d9d7cc;border-radius:5px;padding-right:9px;background:#faf9f5}
+.unit-input input{width:80px;min-height:36px;border:0;background:none;color:#34372e;font:12px monospace;padding:7px}
+.unit-input small{color:#919183;font:10px monospace}
+.design-readout{border-top:1px solid #deddd5;padding-top:14px;margin-top:18px;font:10px/1.8 monospace;color:#6b725f}
+.alignment-tools{display:flex;gap:5px}.alignment-tools button{flex:1;padding:6px}
+.design-toolbar{position:absolute;left:24px;top:22px;display:flex;gap:5px;z-index:2;padding:5px;border:1px solid #d6d4c8;border-radius:28px;background:#f6f5f0dc;backdrop-filter:blur(10px)}
+.design-toolbar[hidden]{display:none}.design-toolbar button{border:0;border-radius:20px;min-height:36px;padding:8px 13px}
+.design-toolbar button[aria-pressed=true]{background:#30372d;color:white}
+.measure-layer{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:visible}
+.measure-layer path{fill:none;stroke:#687358;stroke-width:1;stroke-dasharray:3 3}.measure-layer circle{fill:#687358}.measure-layer text{font:11px monospace;fill:#4a5340;text-anchor:middle;paint-order:stroke;stroke:#e9e5dc;stroke-width:5px;stroke-linejoin:round}
+.prompt-dialog{width:min(660px,calc(100vw - 32px));max-height:90dvh;border:1px solid #d5d4ca;border-radius:16px;background:#f6f5f0;padding:26px;color:#34372e;box-shadow:0 30px 100px #20221b30}
+.prompt-dialog::backdrop{background:#20221b50;backdrop-filter:blur(4px)}.prompt-heading{display:flex;align-items:start;justify-content:space-between;gap:16px}.prompt-dialog h2{font:normal 28px Georgia,serif;letter-spacing:-.7px;margin:10px 0}.prompt-dialog p{font:12px/1.6 system-ui;color:#7a7d70}.prompt-dialog textarea{font:12px/1.7 monospace;min-height:38vh;max-height:50vh;padding:16px}.prompt-actions{display:flex;align-items:center;gap:8px;margin-top:18px}.prompt-actions span{flex:1;font:11px system-ui}.prompt-actions #copy-prompt{background:#30372d;color:#fff}
+@media(max-width:740px),(max-width:1000px) and (orientation:portrait){.mobile-sections{flex-wrap:nowrap;overflow-x:auto;padding:3px 18px 12px}.mobile-sections button{min-height:40px!important;flex-shrink:0}.design-toolbar{left:14px;top:14px}.design-toolbar button{min-height:40px;font-size:11px}.unit-input input{font-size:16px;min-height:42px}.section-intro,.format-options,.design-readout,.alignment-tools{grid-column:1/-1}.prompt-dialog textarea{font-size:16px}.prompt-dialog{padding:18px}.prompt-actions{flex-wrap:wrap}.prompt-actions span{flex-basis:100%}}
+@media(max-width:740px),(max-width:1000px) and (orientation:portrait){html[data-managed=true] .design-toolbar{top:44px}}
