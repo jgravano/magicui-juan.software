@@ -14,3 +14,9 @@ test('wheel units normalize and large wheel ticks remain bounded',()=>{
  assert.equal(wheelZoom(.65,-10000),.65);
  assert.equal(wheelZoom(1.65,10000),1.65);
 });
+test('writing can zoom closer without changing existing helper defaults',()=>{
+ let zoom=1;
+ for(let i=0;i<30;i++)zoom=wheelZoom(zoom,-180,0,800,.38);
+ assert.equal(zoom,.38);
+ assert.ok(wheelZoom(.5,-10,0,800,.38)<.5);
+});

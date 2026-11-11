@@ -26,9 +26,9 @@ The Vercel project is connected to private Blob store `juan-studio` (`store_xCNk
 
 ## Verification
 
-`node --test tests/studio-*.test.mjs tests/notebook-share.test.mjs tests/notebook-interactions.test.mjs`
+`node --test tests/studio-*.test.mjs tests/notebook-*.test.mjs`
 
-Tests cover publication isolation, restoration backups, independent projects, invalid presets, concurrent initial and subsequent writes, owner-only access and cross-origin rejection. The production build checks TypeScript. Browser QA covers editing, saving, preview, restoring, publishing locally, creating a project and reloading it, plus desktop/iPad portrait/iPad landscape/mobile layouts. Actual iPad touch hardware remains a separate check.
+Tests cover publication isolation, restoration backups, independent projects, invalid presets, concurrent initial and subsequent writes, owner-only access and cross-origin rejection. Notebook tests also cover ink replay and storage, pointer ownership, page-count conservation, support geometry and perforations. The production build checks TypeScript. Browser QA covers editing, saving, preview, restoring, publishing locally, creating a project and reloading it, plus desktop/iPad portrait/iPad landscape/mobile layouts. Actual iPad touch hardware remains a separate check.
 
 ## Product design tools
 
@@ -39,3 +39,65 @@ The inspector selects one component at a time. The format is in millimetres (50 
 Preset v2 appends the design fields; v1 links and stored versions still decode with default dimensions. Existing published state is not rewritten by deploying the editor. New settings participate in drafts, versions, preview, share links and explicit publication.
 
 Tasks are tracked in GitHub Issues; see [BACKLOG.md](BACKLOG.md). Manufacturing specifications and supplier management are deferred in #9. Further design work is listed in #10.
+
+## Paper, rendering and iPad writing
+
+The renderer separates surface detail, lighting, paper mass and support geometry.
+These refinements do not rewrite design presets, drafts or the published selection.
+They are a visual model, not a calibrated simulation of a manufactured notebook.
+
+`paper-block.js` uses two indexed `InstancedMesh` objects with a fixed leaf pitch.
+A settled spread divides `pages / 2` leaves between the left and right stacks;
+during a turn, one leaf is removed from the stacks and represented by the moving
+sheet. `stackLayout` returns both writing heights and the moving sheet's endpoints.
+The controller applies those heights before deforming the sheet. Small cut and
+shade variations make the individual edges visible without fanning the stack.
+The perforation layout remains shared with the page textures, covers and binding.
+
+`notebook-support.js` computes the slope from the raised binding to the outer
+cover edge resting on the desk. Blocks use that rotation, and `drapeSheet` applies
+the corresponding fall to fresh page-position buffers before normals are updated.
+The writing surfaces keep clearance above the tilted stacks, including the lowest
+point of their curvature. Support tests check desk contact and page clearance at
+the format and thickness limits.
+
+`surface-materials.js` supplies paper fibres, slight acetate finish variation and
+elastic weave at a consistent physical scale. Existing scanned linen and leather
+maps remain available. `studio-lighting.js` combines four shadow-casting light
+samples with a photographic reflection environment generated once at startup.
+Shadow maps update when the object moves or its configuration changes; writing on
+a stationary page does not redraw them for every pen sample. `contact-occlusion.js`
+adds a narrow ambient contact at the supported cover edges, attenuated by their
+height and opening angle. Closing gathers leaves in sequence, preserving the
+volume on each side throughout the motion.
+
+Public `/001` accepts handwriting using Pencil/pen Pointer Events or a mouse.
+A pen writes across the entire sheet, including the corners; touch manipulates
+the notebook. Portrait tablet framing brings the right writing page closer when
+the cover opens. Two fingers zoom and pan, and a quick stationary two-finger tap
+undoes the most recent stroke on the visible spread. Keyboard undo remains
+available. The managed Studio canvas continues to edit designs without including
+handwriting in versions.
+
+`pointer-guard.js` gives an active pen exclusive pointer ownership and suppresses
+touch contacts briefly after lift-off. Rejected contacts stay rejected until they
+lift. A stroke freezes camera and paper motion beneath the nib. `ink-renderer.js`
+draws pressure/tilt-aware midpoint curves into the texture used by the bending
+mesh, with aspect correction so the nib stays round on rectangular sheets.
+Incremental drawing preserves the transparent perforations. Coalesced events are
+used when available, with ordinary Pointer Events as the fallback. Paper textures
+use 2048 pixels and a bounded six-texture cache; stored coordinates remain in the
+original 1024 space.
+
+`ink-storage.js` stores per-page strokes locally in this browser, separately from
+Studio and separately for shared presets. Public 001 uses a stable key across
+visual updates. Storage is bounded, failures retain the live drawing, and invalid
+saved records are protected from overwrite. It is not cloud synchronization.
+`pagehide` and backgrounding flush pending writing. The old standalone Studio's
+two-coordinate strokes can be read without deleting the old record.
+
+Validation covers pressure, replay equivalence, paper mass and clearance, holes,
+storage, pointer ownership and existing Studio isolation. Browser QA covers
+drawing with a mouse, page turns, undo, reload and tablet viewport layouts.
+Viewport emulation cannot validate Pencil pressure, latency, palm rejection or
+gesture feel; those still require a real iPad and Safari.
