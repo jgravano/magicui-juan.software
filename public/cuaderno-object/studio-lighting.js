@@ -1,12 +1,11 @@
 import * as THREE from './vendor/three.module.min.js';
 
-// A small four-sample softbox retains contact shadows around the wire while its
-// separated samples soften shadows cast farther from the page. Total map area is
-// the same as one 2048² map; the environment is captured only once.
+// Two softbox samples preserve separated soft shadows without rendering the
+// scene into four shadow maps on every gesture. Reflections are captured once.
 export function createStudioLighting(renderer, scene) {
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   const hemisphere = new THREE.HemisphereLight(0xf6f8ff, 0x746958, .20);
-  const offsets = [[-.34,-.52],[.34,-.52],[-.34,.52],[.34,.52]];
+  const offsets = [[-.34,-.52],[.34,.52]];
   const keys = offsets.map(() => {
     const light = new THREE.DirectionalLight(0xfffaf2, .7);
     light.castShadow = true;

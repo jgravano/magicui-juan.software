@@ -63,7 +63,7 @@ the format and thickness limits.
 
 `surface-materials.js` supplies paper fibres, slight acetate finish variation and
 elastic weave at a consistent physical scale. Existing scanned linen and leather
-maps remain available. `studio-lighting.js` combines four shadow-casting light
+maps remain available. `studio-lighting.js` combines two shadow-casting light
 samples with a photographic reflection environment generated once at startup.
 Shadow maps update when the object moves or its configuration changes; writing on
 a stationary page does not redraw them for every pen sample. `contact-occlusion.js`
@@ -101,3 +101,29 @@ storage, pointer ownership and existing Studio isolation. Browser QA covers
 drawing with a mouse, page turns, undo, reload and tablet viewport layouts.
 Viewport emulation cannot validate Pencil pressure, latency, palm rejection or
 gesture feel; those still require a real iPad and Safari.
+
+### Rendering budget
+
+`render-loop.js` schedules a frame on input or configuration changes and continues
+only while physics or page geometry need to settle. The scene stays dormant until
+initial asynchronous material loading finishes, stops when the tab is hidden, and
+uses a fresh timestep on wake. Stationary handwriting uploads ink on input without
+redrawing shadows. The elastic only recomputes vertices/normals when its shape changes.
+
+Retina rendering is capped at 1.5 device pixels per CSS pixel and three million
+pixels overall. Acetate transmission uses half-resolution intermediate targets;
+the final object, paper and writing remain at the renderer's resolution. Two
+1024² shadow samples retain the existing total light intensity and environment.
+
+`binding.js` shares a 64×8 tube geometry through an `InstancedMesh` for single and
+double wire bindings. The default 48 wires use one draw per pass and 49,152
+triangles instead of 48 draws and 110,592 triangles. Spiral binding remains one
+continuous mesh with 48 longitudinal segments per configured loop and eight
+radial segments. Placement, perforations and wire dimensions remain unchanged.
+
+Regression coverage includes render sleep/wake, hidden tabs, input coalescing,
+initial loading, pixel budget, binding positions and resource disposal. Browser
+verification should compare actual motion cadence (excluding idle sleep), inspect
+closed/open views, and exercise elastic, page turns, handwriting, undo, rotation,
+zoom, resizing and Studio edits. Emulator results do not establish performance on
+every MacBook model or browser.
